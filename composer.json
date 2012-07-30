@@ -18,19 +18,19 @@
             "role": "Developer"
         }
     ],
-
+    "minimum-stability": "dev",
     "require": {
         "php": ">=5.3.0",
-        "symfony/event-dispatcher": "2.1.0-BETA1"
+        "symfony/event-dispatcher": "2.1.0-BETA4"
     },
 
     "require-dev": {
         "doctrine/orm": "2.2.2",
         "doctrine/dbal": "2.2.2",
         "doctrine/common": "2.2.2",
-        "symfony/http-foundation": "2.1.0-BETA1",
-        "symfony/http-kernel": "2.1.0-BETA1",
-        "symfony/security": "2.1.0-BETA1",
+        "symfony/http-foundation": "2.1.0-BETA4",
+        "symfony/http-kernel": "2.1.0-BETA4",
+        "symfony/security": "2.1.0-BETA4",
         "zendframework/zendframework": ">=2.0.x-dev",
         "videlalvaro/php-amqplib": ">=dev-master"
 
