@@ -10,7 +10,7 @@
 namespace Xi\Filelib\Tool\Slugifier;
 
 use Zend\Filter\FilterChain;
-use Zend\Filter\Alnum as AlnumFilter;
+use Zend\I18n\Filter\Alnum as AlnumFilter;
 use Zend\Filter\Word\SeparatorToDash as SeparatorToDashFilter;
 use Zend\Filter\StringToLower as StringToLowerFilter;
 use Zend\Filter\Word\UnderscoreToDash as UnderscoreToDashFilter;
