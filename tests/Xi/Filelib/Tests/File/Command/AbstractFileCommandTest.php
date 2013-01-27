@@ -11,7 +11,10 @@ class AbstractFileCommandTest extends \Xi\Filelib\Tests\TestCase
     public function classShouldExist()
     {
         $this->assertTrue(class_exists('Xi\Filelib\File\Command\AbstractFileCommand'));
-        $this->assertContains('Xi\Filelib\File\Command\FileCommand', class_implements('Xi\Filelib\File\Command\AbstractFileCommand'));
+        $this->assertContains(
+            'Xi\Filelib\File\Command\FileCommand',
+            class_implements('Xi\Filelib\File\Command\AbstractFileCommand')
+        );
     }
 
     /**
@@ -21,20 +24,21 @@ class AbstractFileCommandTest extends \Xi\Filelib\Tests\TestCase
     {
         $uuid = 'tussi-id';
 
-        $fileOperator = $this->getMockBuilder('Xi\Filelib\File\FileOperator')->disableOriginalConstructor()->getMock();
+        $fileOperator = $this->getMockedFileOperator();
 
-        $fileOperator->expects($this->once())->method('generateUuid')
-                     ->will($this->returnValue($uuid));
+        $fileOperator
+            ->expects($this->once())
+            ->method('generateUuid')
+            ->will($this->returnValue($uuid));
 
-        $command = $this->getMockBuilder('Xi\Filelib\File\Command\AbstractFileCommand')
-                        ->setMethods(array('execute'))
-                        ->setConstructorArgs(array($fileOperator))
-                        ->getMockForAbstractClass();
+        $command = $this
+            ->getMockBuilder('Xi\Filelib\File\Command\AbstractFileCommand')
+            ->setMethods(array('execute'))
+            ->setConstructorArgs(array($fileOperator))
+            ->getMockForAbstractClass();
 
         $this->assertSame($fileOperator, $command->getFileOperator());
-
         $this->assertSame($uuid, $command->getUuid());
-
     }
 
 }

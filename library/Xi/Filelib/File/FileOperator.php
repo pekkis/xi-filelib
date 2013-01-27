@@ -21,11 +21,6 @@ use Xi\Filelib\File\Upload\FileUpload;
 use Xi\Filelib\Plugin\VersionProvider\VersionProvider;
 use Xi\Filelib\Event\FileProfileEvent;
 use Xi\Filelib\EnqueueableCommand;
-use Xi\Filelib\File\Command\UploadFileCommand;
-use Xi\Filelib\File\Command\UpdateFileCommand;
-use Xi\Filelib\File\Command\DeleteFileCommand;
-use Xi\Filelib\File\Command\PublishFileCommand;
-use Xi\Filelib\File\Command\UnpublishFileCommand;
 use Xi\Filelib\Tool\TypeResolver\TypeResolver;
 use Xi\Filelib\Tool\TypeResolver\StupidTypeResolver;
 use Xi\Filelib\Backend\Finder\FileFinder;
@@ -69,9 +64,14 @@ class FileOperator extends AbstractOperator
 
     /**
      *
-     * @var type TypeResolver
+     * @var TypeResolver
      */
     private $typeResolver;
+
+    /**
+     * @var FolderOperator
+     */
+    private $folderOperator;
 
     /**
      * Returns a file
@@ -346,7 +346,7 @@ class FileOperator extends AbstractOperator
      */
     public function getFolderOperator()
     {
-        return $this->getFilelib()->getFolderOperator();
+        return $this->folderOperator;
     }
 
     /**
@@ -373,4 +373,13 @@ class FileOperator extends AbstractOperator
         return $this;
     }
 
+    /**
+     * @param $folderOperator
+     * @return FileOperator
+     */
+    public function injectFolderOperator(FolderOperator $folderOperator)
+    {
+        $this->folderOperator = $folderOperator;
+        return $this;
+    }
 }

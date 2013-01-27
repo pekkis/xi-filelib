@@ -18,9 +18,29 @@ use Xi\Filelib\File\Upload\FileUpload;
 use Xi\Filelib\EnqueueableCommand;
 use Xi\Filelib\Backend\Finder\FileFinder;
 use ArrayIterator;
+use Xi\Filelib\Configuration;
 
 class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
 {
+    /**
+     * @var Configuration
+     */
+    private $configuration;
+
+    /**
+     * @var FileOperator
+     */
+    private $op;
+
+    private $backend;
+
+    public function setUp()
+    {
+        $this->configuration = $this->getConfigurationWithMockedObjects();
+        $this->op = new FileOperator($this->configuration);
+        $this->backend = $this->configuration->getBackend();
+    }
+
     /**
      * @test
      */
@@ -34,16 +54,40 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
      */
     public function strategiesShouldDefaultToSynchronous()
     {
-        $filelib = $this->getMock('Xi\Filelib\FileLibrary');
-        $op = new FileOperator($filelib);
+        $this->assertEquals(
+            EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+            $this->op->getCommandStrategy(FileOperator::COMMAND_UPLOAD)
+        );
 
-        $this->assertEquals(EnqueueableCommand::STRATEGY_SYNCHRONOUS, $op->getCommandStrategy(FileOperator::COMMAND_UPLOAD));
-        $this->assertEquals(EnqueueableCommand::STRATEGY_SYNCHRONOUS, $op->getCommandStrategy(FileOperator::COMMAND_AFTERUPLOAD));
-        $this->assertEquals(EnqueueableCommand::STRATEGY_SYNCHRONOUS, $op->getCommandStrategy(FileOperator::COMMAND_UPDATE));
-        $this->assertEquals(EnqueueableCommand::STRATEGY_SYNCHRONOUS, $op->getCommandStrategy(FileOperator::COMMAND_DELETE));
-        $this->assertEquals(EnqueueableCommand::STRATEGY_SYNCHRONOUS, $op->getCommandStrategy(FileOperator::COMMAND_PUBLISH));
-        $this->assertEquals(EnqueueableCommand::STRATEGY_SYNCHRONOUS, $op->getCommandStrategy(FileOperator::COMMAND_UNPUBLISH));
-        $this->assertEquals(EnqueueableCommand::STRATEGY_SYNCHRONOUS, $op->getCommandStrategy(FileOperator::COMMAND_COPY));
+        $this->assertEquals(
+            EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+            $this->op->getCommandStrategy(FileOperator::COMMAND_AFTERUPLOAD)
+        );
+
+        $this->assertEquals(
+            EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+            $this->op->getCommandStrategy(FileOperator::COMMAND_UPDATE)
+        );
+
+        $this->assertEquals(
+            EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+            $this->op->getCommandStrategy(FileOperator::COMMAND_DELETE)
+        );
+
+        $this->assertEquals(
+            EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+            $this->op->getCommandStrategy(FileOperator::COMMAND_PUBLISH)
+        );
+
+        $this->assertEquals(
+            EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+            $this->op->getCommandStrategy(FileOperator::COMMAND_UNPUBLISH)
+        );
+
+        $this->assertEquals(
+            EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+            $this->op->getCommandStrategy(FileOperator::COMMAND_COPY)
+        );
     }
 
     /**
@@ -51,15 +95,20 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
      */
     public function settingAndGettingCommandStrategiesShouldWork()
     {
-        $filelib = $this->getMock('Xi\Filelib\FileLibrary');
-        $op = new FileOperator($filelib);
+        $this->assertEquals(
+            EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+            $this->op->getCommandStrategy(FileOperator::COMMAND_UPLOAD)
+        );
 
-        $this->assertEquals(EnqueueableCommand::STRATEGY_SYNCHRONOUS, $op->getCommandStrategy(FileOperator::COMMAND_UPLOAD));
+        $this->assertSame(
+            $this->op,
+            $this->op->setCommandStrategy(FileOperator::COMMAND_UPLOAD, EnqueueableCommand::STRATEGY_ASYNCHRONOUS)
+        );
 
-        $this->assertSame($op, $op->setCommandStrategy(FileOperator::COMMAND_UPLOAD, EnqueueableCommand::STRATEGY_ASYNCHRONOUS));
-
-        $this->assertEquals(EnqueueableCommand::STRATEGY_ASYNCHRONOUS, $op->getCommandStrategy(FileOperator::COMMAND_UPLOAD));
-
+        $this->assertEquals(
+            EnqueueableCommand::STRATEGY_ASYNCHRONOUS,
+            $this->op->getCommandStrategy(FileOperator::COMMAND_UPLOAD)
+        );
     }
 
     /**
@@ -67,31 +116,26 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
      */
     public function uploadShouldExecuteCommandsWhenSynchronousStrategyIsUsed()
     {
-        $filelib = $this->getMock('Xi\Filelib\FileLibrary');
-
         $folder = $this->getMock('Xi\Filelib\Folder\Folder');
 
         $upload = new FileUpload(ROOT_TESTS . '/data/self-lussing-manatee.jpg');
         $profile = 'versioned';
 
-        $op = $this->getMockBuilder('Xi\Filelib\File\FileOperator')
-                   ->setMethods(array('createCommand', 'getQueue'))
-                   ->setConstructorArgs(array($filelib))
-                   ->getMock();
-
+        $op = $this->getOpMock(array('createCommand', 'getQueue'));
         $op->expects($this->never())->method('getQueue');
 
-        $uploadCommand = $this->getMockBuilder('Xi\Filelib\File\Command\UploadFileCommand')
-                               ->setConstructorArgs(array($op, $upload, $folder, $profile))
-                               ->setMethods(array('execute'))
-                               ->getMock();
+        $uploadCommand = $this->getMock('Xi\Filelib\EnqueueableCommand');
+        $uploadCommand
+            ->expects($this->once())
+            ->method('execute');
 
-        $uploadCommand->expects($this->once())->method('execute');
-
-        $op->expects($this->at(0))->method('createCommand')->with($this->equalTo('Xi\Filelib\File\Command\UploadFileCommand'))->will($this->returnValue($uploadCommand));
+        $op
+            ->expects($this->at(0))
+            ->method('createCommand')
+            ->with($this->equalTo('Xi\Filelib\File\Command\UploadFileCommand'))
+            ->will($this->returnValue($uploadCommand));
 
         $op->upload($upload, $folder, $profile);
-
     }
 
     /**
@@ -99,33 +143,32 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
      */
     public function uploadShouldQueueUploadCommandWhenAynchronousStrategyIsUsed()
     {
-        $filelib = $this->getMock('Xi\Filelib\FileLibrary');
-
         $folder = $this->getMock('Xi\Filelib\Folder\Folder');
         $upload = new FileUpload(ROOT_TESTS . '/data/self-lussing-manatee.jpg');
         $profile = 'versioned';
 
-        $op = $this->getMockBuilder('Xi\Filelib\File\FileOperator')
-                   ->setMethods(array('createCommand', 'getQueue'))
-                   ->setConstructorArgs(array($filelib))
-                   ->getMock();
+        $op = $this->getOpMock(array('createCommand'));
 
-        $queue = $this->getMockForAbstractClass('Xi\Filelib\Queue\Queue');
-        $op->expects($this->atLeastOnce())->method('getQueue')->will($this->returnValue($queue));
+        $uploadCommand = $this->getMock('Xi\Filelib\EnqueueableCommand');
+        $uploadCommand
+            ->expects($this->never())
+            ->method('execute');
 
-        $uploadCommand = $this->getMockBuilder('Xi\Filelib\File\Command\UploadFileCommand')
-                               ->setConstructorArgs(array($op, $upload, $folder, $profile))
-                               ->setMethods(array('execute'))
-                               ->getMock();
+        $queue = $this->configuration->getQueue();
+        $queue
+            ->expects($this->once())
+            ->method('enqueue')
+            ->with($uploadCommand);
 
-        $queue->expects($this->once())->method('enqueue')->with($this->isInstanceOf('Xi\Filelib\File\Command\UploadFileCommand'));
-
-        $op->expects($this->at(0))->method('createCommand')->with($this->equalTo('Xi\Filelib\File\Command\UploadFileCommand'))->will($this->returnValue($uploadCommand));
+        $op
+            ->expects($this->at(0))
+            ->method('createCommand')
+            ->with($this->equalTo('Xi\Filelib\File\Command\UploadFileCommand'))
+            ->will($this->returnValue($uploadCommand));
 
         $op->setCommandStrategy(FileOperator::COMMAND_UPLOAD, EnqueueableCommand::STRATEGY_ASYNCHRONOUS);
 
         $op->upload($upload, $folder, $profile);
-
     }
 
     /**
@@ -133,10 +176,7 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
      */
     public function getInstanceShouldReturnAnInstanceOfFileWithNoData()
     {
-        $filelib = $this->getMock('Xi\Filelib\FileLibrary');
-        $op = new FileOperator($filelib);
-
-        $file = $op->getInstance();
+        $file = $this->op->getInstance();
         $this->assertInstanceOf('Xi\Filelib\File\File', $file);
 
     }
@@ -146,14 +186,10 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
      */
     public function getInstanceShouldReturnAnInstanceOfFileWithData()
     {
-        $filelib = $this->getMock('Xi\Filelib\FileLibrary');
-        $op = new FileOperator($filelib);
-
         $data = array(
             'name' => 'larva-consumes-newspaper.jpg',
         );
-
-        $file = $op->getInstance($data);
+        $file = $this->op->getInstance($data);
         $this->assertInstanceOf('Xi\Filelib\File\File', $file);
 
         $this->assertEquals('larva-consumes-newspaper.jpg', $file->getName());
@@ -165,33 +201,33 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
      */
     public function addProfileShouldAddProfile()
     {
-        $filelib = $this->getMock('Xi\Filelib\FileLibrary');
-        $op = new FileOperator($filelib);
+        $this->assertEquals(array(), $this->op->getProfiles());
 
-        $eventDispatcher = $this->getMockForAbstractClass('Symfony\Component\EventDispatcher\EventDispatcherInterface');
-        $filelib->expects($this->any())->method('getEventDispatcher')->will($this->returnValue($eventDispatcher));
+        $profile = $this->getMockedFileProfile('xooxer');
+        $profile2 = $this->getMockedFileProfile('lusser');
 
-        $this->assertEquals(array(), $op->getProfiles());
+        $eventDispatcher = $this->configuration->getEventDispatcher();
+        $eventDispatcher
+            ->expects($this->exactly(2))
+            ->method('addSubscriber')
+            ->with($this->isInstanceOf('Xi\Filelib\File\FileProfile'));
 
-        $profile = $this->getMockedFileProfile();
-        $profile->expects($this->any())->method('getIdentifier')->will($this->returnValue('xooxer'));
+        $eventDispatcher
+            ->expects($this->exactly(2))
+            ->method('dispatch')
+            ->with(
+                $this->equalTo('xi_filelib.profile.add'),
+                $this->isInstanceOf('Xi\Filelib\Event\FileProfileEvent')
+            );
 
-        $profile2 = $this->getMockedFileProfile();
-        $profile2->expects($this->any())->method('getIdentifier')->will($this->returnValue('lusser'));
+        $this->op->addProfile($profile);
+        $this->assertCount(1, $this->op->getProfiles());
 
-        $eventDispatcher->expects($this->exactly(2))->method('addSubscriber')->with($this->isInstanceOf('Xi\Filelib\File\FileProfile'));
+        $this->op->addProfile($profile2);
+        $this->assertCount(2, $this->op->getProfiles());
 
-        $eventDispatcher->expects($this->exactly(2))->method('dispatch')
-                        ->with($this->equalTo('xi_filelib.profile.add'), $this->isInstanceOf('Xi\Filelib\Event\FileProfileEvent'));
-
-        $op->addProfile($profile);
-        $this->assertCount(1, $op->getProfiles());
-
-        $op->addProfile($profile2);
-        $this->assertCount(2, $op->getProfiles());
-
-        $this->assertSame($profile, $op->getProfile('xooxer'));
-        $this->assertSame($profile2, $op->getProfile('lusser'));
+        $this->assertSame($profile, $this->op->getProfile('xooxer'));
+        $this->assertSame($profile2, $this->op->getProfile('lusser'));
     }
 
     /**
@@ -200,24 +236,11 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
      */
     public function addProfileShouldFailWhenProfileAlreadyExists()
     {
-        $linker = $this->getMockForAbstractClass('Xi\Filelib\Linker\Linker');
+        $profile = $this->getMockedFileProfile('xooxer');
+        $profile2 = $this->getMockedFileProfile('xooxer');
 
-        $profile = $this->getMockedFileProfile();
-        $profile->expects($this->any())->method('getIdentifier')->will($this->returnValue('xooxer'));
-        $profile->expects($this->any())->method('getLinker')->will($this->returnValue($linker));
-
-        $profile2 = $this->getMockedFileProfile();
-        $profile2->expects($this->any())->method('getIdentifier')->will($this->returnValue('xooxer'));
-        $profile2->expects($this->any())->method('getLinker')->will($this->returnValue($linker));
-
-        $filelib = $this->getMock('Xi\Filelib\FileLibrary');
-        $eventDispatcher = $this->getMockForAbstractClass('Symfony\Component\EventDispatcher\EventDispatcherInterface');
-        $filelib->expects($this->any())->method('getEventDispatcher')->will($this->returnValue($eventDispatcher));
-
-        $op = new FileOperator($filelib);
-
-        $op->addProfile($profile);
-        $op->addProfile($profile2);
+        $this->op->addProfile($profile);
+        $this->op->addProfile($profile2);
     }
 
     /**
@@ -226,10 +249,7 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
      */
     public function getProfileShouldFailWhenProfileDoesNotExist()
     {
-       $filelib = $this->getMock('Xi\Filelib\FileLibrary');
-       $op = new FileOperator($filelib);
-
-       $prof = $op->getProfile('xooxer');
+       $prof = $this->op->getProfile('xooxer');
     }
 
     /**
@@ -239,18 +259,13 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
     {
         $id = 1;
 
-        $filelib = new FileLibrary();
-        $op = new FileOperator($filelib);
-
-        $backend = $this->getBackendMock();
-        $backend
+        $this->backend
             ->expects($this->once())
             ->method('findById')
             ->with($id, 'Xi\Filelib\File\File')
             ->will($this->returnValue(false));
 
-        $filelib->setBackend($backend);
-        $file = $op->find($id);
+        $file = $this->op->find($id);
         $this->assertEquals(false, $file);
     }
 
@@ -260,24 +275,15 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
     public function findShouldReturnFileInstanceIfFileIsFound()
     {
         $id = 1;
-
-        $filelib = new FileLibrary();
-        $eventDispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
-        $filelib->setEventDispatcher($eventDispatcher);
-        $op = new FileOperator($filelib);
-
         $file = new File();
 
-        $backend = $this->getBackendMock();
-        $backend
+        $this->backend
             ->expects($this->once())
             ->method('findById')
             ->with($this->equalTo($id))
             ->will($this->returnValue($file));
 
-        $filelib->setBackend($backend);
-
-        $ret = $op->find($id);
+        $ret = $this->op->find($id);
         $this->assertSame($file, $ret);
     }
 
@@ -286,11 +292,7 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
      */
     public function findByFilenameShouldReturnFalseIfFileIsNotFound()
     {
-        $filelib = new FileLibrary();
-        $op = new FileOperator($filelib);
-
         $folder = Folder::create(array('id' => 6));
-
         $finder = new FileFinder(
             array(
                 'folder_id' => 6,
@@ -298,17 +300,14 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
             )
         );
 
-        $backend = $this->getBackendMock();
-        $filelib->setBackend($backend);
-
-        $backend
+        $this->backend
             ->expects($this->once())
             ->method('findByFinder')->with(
                 $this->equalTo($finder)
             )
             ->will($this->returnValue(new ArrayIterator(array())));
 
-        $ret = $op->findByFilename($folder, 'lussname');
+        $ret = $this->op->findByFilename($folder, 'lussname');
         $this->assertFalse($ret);
     }
 
@@ -317,17 +316,8 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
      */
     public function findByFilenameShouldReturnFileInstanceIfFileIsFound()
     {
-        $id = 1;
-
-        $filelib = new FileLibrary();
-        $eventDispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
-        $filelib->setEventDispatcher($eventDispatcher);
-        $op = new FileOperator($filelib);
-
         $folder = Folder::create(array('id' => 6));
-
         $file = new File();
-
         $finder = new FileFinder(
             array(
                 'folder_id' => 6,
@@ -335,17 +325,14 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
             )
         );
 
-        $backend = $this->getBackendMock();
-        $filelib->setBackend($backend);
-
-        $backend
+        $this->backend
             ->expects($this->once())
             ->method('findByFinder')->with(
                 $this->equalTo($finder)
             )
             ->will($this->returnValue(new ArrayIterator(array($file))));
 
-        $ret = $op->findByFilename($folder, 'lussname');
+        $ret = $this->op->findByFilename($folder, 'lussname');
         $this->assertSame($file, $ret);
     }
 
@@ -354,26 +341,14 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
      */
     public function findAllShouldReturnEmptyIfNoFilesAreFound()
     {
-        $filelib = new FileLibrary();
-        $eventDispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
-        $filelib->setEventDispatcher($eventDispatcher);
-        $op = new FileOperator($filelib);
-
-        $backend = $this->getBackendMock();
-        $filelib->setBackend($backend);
-
         $finder = new FileFinder();
-
-        $backend
+        $this->backend
             ->expects($this->once())
             ->method('findByFinder')->with(
-            $this->equalTo($finder)
-        )
+                $this->equalTo($finder)
+            )
             ->will($this->returnValue(new ArrayIterator(array())));
-
-        $eventDispatcher->expects($this->never())->method('dispatch');
-
-        $files = $op->findAll();
+        $files = $this->op->findAll();
         $this->assertCount(0, $files);
 
     }
@@ -383,32 +358,20 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
      */
     public function findAllShouldReturnAnArrayOfFileInstancesIfFilesAreFound()
     {
-        $filelib = new FileLibrary();
-        $eventDispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
-        $filelib->setEventDispatcher($eventDispatcher);
-
-        $op = new FileOperator($filelib);
-
-        $backend = $this->getBackendMock();
-        $filelib->setBackend($backend);
-
         $finder = new FileFinder();
-
         $iter = new ArrayIterator(array(
             new File(),
             new File(),
             new File(),
         ));
-
-        $backend
+        $this->backend
             ->expects($this->once())
             ->method('findByFinder')->with(
-            $this->equalTo($finder)
-        )
+                $this->equalTo($finder)
+            )
             ->will($this->returnValue($iter));
 
-        $files = $op->findAll();
-
+        $files = $this->op->findAll();
         $this->assertSame($iter, $files);
     }
 
@@ -417,13 +380,8 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
      */
     public function prepareUploadShouldReturnFileUpload()
     {
-        $filelib = new FileLibrary();
-        $op = new FileOperator($filelib);
-
-        $upload = $op->prepareUpload(ROOT_TESTS . '/data/self-lussing-manatee.jpg');
-
+        $upload = $this->op->prepareUpload(ROOT_TESTS . '/data/self-lussing-manatee.jpg');
         $this->assertInstanceOf('Xi\Filelib\File\Upload\FileUpload', $upload);
-
     }
 
     /**
@@ -431,11 +389,10 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
      */
     public function typeResolverShouldDefaultToStupid()
     {
-        $filelib = new FileLibrary();
-        $op = new FileOperator($filelib);
-
-        $this->assertInstanceOf('Xi\Filelib\Tool\TypeResolver\StupidTypeResolver', $op->getTypeResolver());
-
+        $this->assertInstanceOf(
+            'Xi\Filelib\Tool\TypeResolver\StupidTypeResolver',
+            $this->op->getTypeResolver()
+        );
     }
 
     /**
@@ -443,13 +400,9 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
      */
     public function typeResolverShouldRespectSetter()
     {
-        $filelib = new FileLibrary();
-        $op = new FileOperator($filelib);
-
         $typeResolver = $this->getMock('Xi\Filelib\Tool\TypeResolver\TypeResolver');
-
-        $op->setTypeResolver($typeResolver);
-        $this->assertSame($typeResolver, $op->getTypeResolver());
+        $this->assertSame($this->op, $this->op->setTypeResolver($typeResolver));
+        $this->assertSame($typeResolver, $this->op->getTypeResolver());
     }
 
     /**
@@ -457,21 +410,21 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
      */
     public function getTypeShouldDelegateToTypeResolver()
     {
-        $filelib = new FileLibrary();
-        $op = new FileOperator($filelib);
-
         $typeResolver = $this->getMock('Xi\Filelib\Tool\TypeResolver\TypeResolver');
-        $typeResolver->expects($this->once())->method('resolveType')
-                     ->with($this->equalTo('application/lus'));
+        $typeResolver
+            ->expects($this->once())
+            ->method('resolveType')
+            ->with($this->equalTo('application/lus'))
+            ->will($this->returnValue('losoface'));
 
         $file = File::create(array(
             'name' => 'larvador.lus',
             'resource' => Resource::create(array('mimetype' => 'application/lus'))
         ));
 
-        $op->setTypeResolver($typeResolver);
-        $op->getType($file);
-
+        $this->op->setTypeResolver($typeResolver);
+        $ret = $this->op->getType($file);
+        $this->assertEquals('losoface', $ret);
     }
 
     /**
@@ -479,21 +432,25 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
      */
     public function hasVersionShouldDelegateToProfile()
     {
-        $filelib = $this->getMock('Xi\Filelib\FileLibrary');
-        $op = $this->getMockBuilder('Xi\Filelib\File\FileOperator')
-                   ->setConstructorArgs(array($filelib))
-                   ->setMethods(array('getProfile'))
-                   ->getMock();
+        $op = $this->getOpMock(array('getProfile'));
 
-         $file = File::create(array('profile' => 'meisterlus'));
+        $file = File::create(array('profile' => 'meisterlus'));
 
-         $profile = $this->getMockedFileProfile();
-         $profile->expects($this->once())->method('fileHasVersion')->with($this->equalTo($file), $this->equalTo('kloo'));
+        $profile = $this->getMockedFileProfile();
+        $profile
+            ->expects($this->once())
+            ->method('fileHasVersion')
+            ->with($this->equalTo($file), $this->equalTo('kloo'))
+            ->will($this->returnValue(false));
 
-         $op->expects($this->any())->method('getProfile')->with($this->equalTo('meisterlus'))->will($this->returnValue($profile));
+        $op
+            ->expects($this->any())
+            ->method('getProfile')
+            ->with($this->equalTo('meisterlus'))
+            ->will($this->returnValue($profile));
 
-         $hasVersion = $op->hasVersion($file, 'kloo');
-
+        $hasVersion = $op->hasVersion($file, 'kloo');
+        $this->assertFalse($hasVersion);
     }
 
     /**
@@ -501,21 +458,24 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
      */
     public function getVersionProviderShouldDelegateToProfile()
     {
-        $filelib = $this->getMock('Xi\Filelib\FileLibrary');
-        $op = $this->getMockBuilder('Xi\Filelib\File\FileOperator')
-                   ->setConstructorArgs(array($filelib))
-                   ->setMethods(array('getProfile'))
-                   ->getMock();
+        $op = $this->getOpMock(array('getProfile'));
+        $file = File::create(array('profile' => 'meisterlus'));
 
-         $file = File::create(array('profile' => 'meisterlus'));
+        $profile = $this->getMockedFileProfile();
+        $profile
+            ->expects($this->once())
+            ->method('getVersionProvider')
+            ->with($this->equalTo($file), $this->equalTo('kloo'))
+            ->will($this->returnValue('lus'));
 
-         $profile = $this->getMockedFileProfile();
-         $profile->expects($this->once())->method('getVersionProvider')->with($this->equalTo($file), $this->equalTo('kloo'));
+        $op
+            ->expects($this->any())
+            ->method('getProfile')
+            ->with($this->equalTo('meisterlus'))
+            ->will($this->returnValue($profile));
 
-         $op->expects($this->any())->method('getProfile')->with($this->equalTo('meisterlus'))->will($this->returnValue($profile));
-
-         $vp = $op->getVersionProvider($file, 'kloo');
-
+        $vp = $op->getVersionProvider($file, 'kloo');
+        $this->assertEquals('lus', $vp);
     }
 
     /**
@@ -523,37 +483,47 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
      */
     public function addProfileShouldDelegateToProfile()
     {
+        $op = $this->getOpMock(array('getProfile'));
 
-        $filelib = $this->getMock('Xi\Filelib\FileLibrary');
-        $op = $this->getMockBuilder('Xi\Filelib\File\FileOperator')
-                   ->setConstructorArgs(array($filelib))
-                   ->setMethods(array('getProfile'))
-                   ->getMock();
-
-        $plugin = $this->getMockForAbstractClass('Xi\Filelib\Plugin\Plugin');
-        $plugin->expects($this->atLeastOnce())->method('getProfiles')->will($this->returnValue(array('lussi', 'tussi', 'jussi')));
+        $plugin = $this->getMockedPlugin();
+        $plugin
+            ->expects($this->atLeastOnce())
+            ->method('getProfiles')
+            ->will($this->returnValue(array('lussi', 'tussi', 'jussi')));
 
         $profile1 = $this->getMockedFileProfile();
-        $profile1->expects($this->once())->method('addPlugin')->with($this->equalTo($plugin));
+        $profile1
+            ->expects($this->once())
+            ->method('addPlugin')
+            ->with($this->equalTo($plugin));
 
         $profile2 = $this->getMockedFileProfile();
-        $profile2->expects($this->once())->method('addPlugin')->with($this->equalTo($plugin));
+        $profile2
+            ->expects($this->once())
+            ->method('addPlugin')
+            ->with($this->equalTo($plugin));
 
         $profile3 = $this->getMockedFileProfile();
-        $profile3->expects($this->once())->method('addPlugin')->with($this->equalTo($plugin));
+        $profile3
+            ->expects($this->once())
+            ->method('addPlugin')
+            ->with($this->equalTo($plugin));
 
-        $op->expects($this->exactly(3))->method('getProfile')
-           ->with($this->logicalOr($this->equalTo('lussi'), $this->equalTo('tussi'), $this->equalTo('jussi')))
-           ->will($this->returnValueMap(
-                array(
-                    array('tussi', $profile1),
-                    array('lussi', $profile2),
-                    array('jussi', $profile3),
+        $op
+            ->expects($this->exactly(3))
+            ->method('getProfile')
+            ->with($this->logicalOr($this->equalTo('lussi'), $this->equalTo('tussi'), $this->equalTo('jussi')))
+            ->will(
+                $this->returnValueMap(
+                    array(
+                        array('tussi', $profile1),
+                        array('lussi', $profile2),
+                        array('jussi', $profile3),
+                    )
                 )
-            ));
+            );
 
         $op->addPlugin($plugin);
-
     }
 
     /**
@@ -562,45 +532,92 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
      */
     public function settingInvalidstrategyShouldThrowException()
     {
-        $filelib = $this->getMock('Xi\Filelib\FileLibrary');
-
-        $op = $this->getMockBuilder('Xi\Filelib\File\FileOperator')
-                         ->setMethods(array())
-                         ->setConstructorArgs(array($filelib))
-                         ->getMockForAbstractClass();
-
-        $op->setCommandStrategy(FileOperator::COMMAND_UPLOAD, 'tussenhof');
-
-    }
-
-    /**
-    * @test
-    */
-    public function getFolderOperatorShouldDelegateToFilelib()
-    {
-        $filelib = $this->getMock('Xi\Filelib\FileLibrary');
-
-        $filelib->expects($this->once())->method('getFolderOperator');
-
-        $op = new FileOperator($filelib);
-
-        $op->getFolderOperator();
-
+        $this->op->setCommandStrategy(FileOperator::COMMAND_UPLOAD, 'tussenhof');
     }
 
     public function provideCommandMethods()
     {
         return array(
-            array('Xi\Filelib\File\Command\CopyFileCommand', 'copy', FileOperator::COMMAND_COPY, EnqueueableCommand::STRATEGY_ASYNCHRONOUS, true, true),
-            array('Xi\Filelib\File\Command\CopyFileCommand', 'copy', FileOperator::COMMAND_COPY, EnqueueableCommand::STRATEGY_SYNCHRONOUS, false, true),
-            array('Xi\Filelib\File\Command\DeleteFileCommand', 'delete', FileOperator::COMMAND_DELETE, EnqueueableCommand::STRATEGY_ASYNCHRONOUS, true, false),
-            array('Xi\Filelib\File\Command\DeleteFileCommand', 'delete', FileOperator::COMMAND_DELETE, EnqueueableCommand::STRATEGY_SYNCHRONOUS, false, false),
-            array('Xi\Filelib\File\Command\PublishFileCommand', 'publish', FileOperator::COMMAND_PUBLISH, EnqueueableCommand::STRATEGY_ASYNCHRONOUS, true, false),
-            array('Xi\Filelib\File\Command\PublishFileCommand', 'publish', FileOperator::COMMAND_PUBLISH, EnqueueableCommand::STRATEGY_SYNCHRONOUS, false, false),
-            array('Xi\Filelib\File\Command\UnpublishFileCommand', 'unpublish', FileOperator::COMMAND_UNPUBLISH, EnqueueableCommand::STRATEGY_ASYNCHRONOUS, true, false),
-            array('Xi\Filelib\File\Command\UnpublishFileCommand', 'unpublish', FileOperator::COMMAND_UNPUBLISH, EnqueueableCommand::STRATEGY_SYNCHRONOUS, false, false),
-            array('Xi\Filelib\File\Command\UpdateFileCommand', 'update', FileOperator::COMMAND_UPDATE, EnqueueableCommand::STRATEGY_ASYNCHRONOUS, true, false),
-            array('Xi\Filelib\File\Command\UpdateFileCommand', 'update', FileOperator::COMMAND_UPDATE, EnqueueableCommand::STRATEGY_SYNCHRONOUS, false, false),
+            array(
+                'Xi\Filelib\File\Command\CopyFileCommand',
+                'copy',
+                FileOperator::COMMAND_COPY,
+                EnqueueableCommand::STRATEGY_ASYNCHRONOUS,
+                true,
+                true
+            ),
+            array(
+                'Xi\Filelib\File\Command\CopyFileCommand',
+                'copy',
+                FileOperator::COMMAND_COPY,
+                EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+                false,
+                true
+            ),
+            array(
+                'Xi\Filelib\File\Command\DeleteFileCommand',
+                'delete',
+                FileOperator::COMMAND_DELETE,
+                EnqueueableCommand::STRATEGY_ASYNCHRONOUS,
+                true,
+                false
+            ),
+            array(
+                'Xi\Filelib\File\Command\DeleteFileCommand',
+                'delete',
+                FileOperator::COMMAND_DELETE,
+                EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+                false,
+                false
+            ),
+            array(
+                'Xi\Filelib\File\Command\PublishFileCommand',
+                'publish',
+                FileOperator::COMMAND_PUBLISH,
+                EnqueueableCommand::STRATEGY_ASYNCHRONOUS,
+                true,
+                false
+            ),
+            array(
+                'Xi\Filelib\File\Command\PublishFileCommand',
+                'publish',
+                FileOperator::COMMAND_PUBLISH,
+                EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+                false,
+                false
+            ),
+            array(
+                'Xi\Filelib\File\Command\UnpublishFileCommand',
+                'unpublish',
+                FileOperator::COMMAND_UNPUBLISH,
+                EnqueueableCommand::STRATEGY_ASYNCHRONOUS,
+                true,
+                false
+            ),
+            array(
+                'Xi\Filelib\File\Command\UnpublishFileCommand',
+                'unpublish',
+                FileOperator::COMMAND_UNPUBLISH,
+                EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+                false,
+                false
+            ),
+            array(
+                'Xi\Filelib\File\Command\UpdateFileCommand',
+                'update',
+                FileOperator::COMMAND_UPDATE,
+                EnqueueableCommand::STRATEGY_ASYNCHRONOUS,
+                true,
+                false
+            ),
+            array(
+                'Xi\Filelib\File\Command\UpdateFileCommand',
+                'update',
+                FileOperator::COMMAND_UPDATE,
+                EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+                false,
+                false
+            ),
         );
 
     }
@@ -609,58 +626,83 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
      * @test
      * @dataProvider provideCommandMethods
      */
-    public function commandMethodsShouldExecuteOrEnqeueDependingOnStrategy($commandClass, $operatorMethod, $commandName, $strategy, $queueExpected, $fileAndFolder)
-    {
+    public function commandMethodsShouldExecuteOrEnqeueDependingOnStrategy(
+        $commandClass,
+        $operatorMethod,
+        $commandName,
+        $strategy,
+        $queueExpected,
+        $fileAndFolder
+    ) {
 
-         $filelib = $this->getMock('Xi\Filelib\FileLibrary');
+        $op = $this->getOpMock(array('createCommand'));
 
-          $op = $this->getMockBuilder('Xi\Filelib\File\FileOperator')
-                   ->setMethods(array('createCommand', 'getQueue'))
-                   ->setConstructorArgs(array($filelib))
-                   ->getMock();
+        $queue = $this->configuration->getQueue();
 
-          $queue = $this->getMockForAbstractClass('Xi\Filelib\Queue\Queue');
-          $op->expects($this->any())->method('getQueue')->will($this->returnValue($queue));
+        $command = $this->getMockBuilder($commandClass)
+                      ->disableOriginalConstructor()
+                      ->setMethods(array('execute'))
+                      ->getMock();
 
-          $command = $this->getMockBuilder($commandClass)
-                          ->disableOriginalConstructor()
-                          ->setMethods(array('execute'))
-                          ->getMock();
+        if ($queueExpected) {
 
-          if ($queueExpected) {
-              $queue->expects($this->once())->method('enqueue')->with($this->isInstanceOf($commandClass));
-              $command->expects($this->never())->method('execute');
-          } else {
-              $queue->expects($this->never())->method('enqueue');
-              $command->expects($this->once())->method('execute');
-          }
+            $queue
+                ->expects($this->once())
+                ->method('enqueue')
+                ->with($this->isInstanceOf($commandClass));
 
-          $file = $this->getMock('Xi\Filelib\File\File');
-          $folder = $this->getMock('Xi\Filelib\Folder\Folder');
+            $command->expects($this->never())->method('execute');
+        } else {
 
-          $op->expects($this->once())->method('createCommand')->with($this->equalTo($commandClass))->will($this->returnValue($command));
+            $queue
+                ->expects($this->never())
+                ->method('enqueue');
+            $command
+                ->expects($this->once())
+                ->method('execute');
 
-          $op->setCommandStrategy($commandName, $strategy);
+        }
 
-          if ($fileAndFolder) {
-              $op->$operatorMethod($file, $folder);
-          } else {
-              $op->$operatorMethod($file);
-          }
+        $file = $this->getMock('Xi\Filelib\File\File');
+        $folder = $this->getMock('Xi\Filelib\Folder\Folder');
+
+        $op
+            ->expects($this->once())
+            ->method('createCommand')
+            ->with($this->equalTo($commandClass))
+            ->will($this->returnValue($command));
+
+        $op->setCommandStrategy($commandName, $strategy);
+
+        if ($fileAndFolder) {
+          $op->$operatorMethod($file, $folder);
+        } else {
+          $op->$operatorMethod($file);
+        }
 
     }
 
     /**
-     *
+     * @test
      */
-    protected function getBackendMock()
+    public function injectFolderOperatorShouldInjectFolderOperator()
     {
-        $backend = $this
-            ->getMockBuilder('Xi\Filelib\Backend\Backend')
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        return $backend;
+        $fop = $this->getMockedFolderOperator();
+        $this->assertNull($this->op->getFolderOperator());
+        $this->assertSame($this->op, $this->op->injectFolderOperator($fop));
+        $this->assertSame($fop, $this->op->getFolderOperator());
     }
 
+    /**
+     * @param array $methods
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function getOpMock($methods = array())
+    {
+        return $this
+            ->getMockBuilder('Xi\Filelib\File\FileOperator')
+            ->setConstructorArgs(array($this->configuration))
+            ->setMethods($methods)
+            ->getMock();
+    }
 }

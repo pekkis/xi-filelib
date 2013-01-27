@@ -6,6 +6,9 @@ use Xi\Filelib\Configuration;
 
 class TestCase extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
     public function getMockedFilelib()
     {
         $filelib = $this
@@ -16,6 +19,9 @@ class TestCase extends \PHPUnit_Framework_TestCase
         return $filelib;
     }
 
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
     public function getMockedFileOperator()
     {
         $fileop = $this
@@ -26,9 +32,42 @@ class TestCase extends \PHPUnit_Framework_TestCase
         return $fileop;
     }
 
+    /**
+     * @param array $methods
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    public function getConfiguredMockedFileOperator(Configuration $configuration, $methods = array())
+    {
+        $fileop = $this
+            ->getMockBuilder('Xi\Filelib\File\FileOperator')
+            ->setConstructorArgs(array($configuration))
+            ->setMethods($methods)
+            ->getMock();
+
+        return $fileop;
+    }
+
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    public function getMockedFolderOperator()
+    {
+        $folderop = $this
+            ->getMockBuilder('Xi\Filelib\Folder\FolderOperator')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        return $folderop;
+    }
+
     public function getMockedStorage()
     {
         return $this->getMock('Xi\Filelib\Storage\Storage');
+    }
+
+    public function getMockedLinker()
+    {
+        return $this->getMock('Xi\Filelib\Linker\Linker');
     }
 
     public function getMockedAcl()
@@ -66,11 +105,27 @@ class TestCase extends \PHPUnit_Framework_TestCase
         return $backend;
     }
 
-    public function getMockedFileProfile()
+    public function getMockedFileProfile($name = null)
     {
-        return $this->getMockBuilder('Xi\Filelib\File\FileProfile')
+        $profile = $this
+            ->getMockBuilder('Xi\Filelib\File\FileProfile')
             ->disableOriginalConstructor()
             ->getMock();
+
+        if ($name) {
+            $profile
+                ->expects($this->any())
+                ->method('getIdentifier')
+                ->will($this->returnValue($name));
+        }
+
+        return $profile;
+    }
+
+    public function getMockedPlugin()
+    {
+        $plugin = $this->getMock('Xi\Filelib\Plugin\Plugin');
+        return $plugin;
     }
 
     /**

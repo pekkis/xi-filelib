@@ -21,7 +21,6 @@ use ArrayIterator;
 /**
  * Operates on folders
  *
- * @package Xi_Filelib
  * @author pekkis
  *
  */
@@ -38,6 +37,8 @@ class FolderOperator extends AbstractOperator
         self::COMMAND_UPDATE => EnqueueableCommand::STRATEGY_SYNCHRONOUS,
         self::COMMAND_CREATE_BY_URL => EnqueueableCommand::STRATEGY_SYNCHRONOUS,
     );
+
+    private $fileOperator;
 
     /**
      * Returns directory route for folder
@@ -219,6 +220,19 @@ class FolderOperator extends AbstractOperator
      */
     public function getFileOperator()
     {
-        return $this->getFilelib()->getFileOperator();
+        return $this->fileOperator;
     }
+
+    /**
+     * @param $fileOperator
+     * @return FolderOperator
+     */
+    public function injectFileOperator(FileOperator $fileOperator)
+    {
+        $this->fileOperator = $fileOperator;
+
+        return $this;
+    }
+
+
 }
