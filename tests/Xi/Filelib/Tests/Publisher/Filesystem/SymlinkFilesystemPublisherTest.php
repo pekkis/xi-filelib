@@ -422,7 +422,7 @@ class SymlinkFilesystemPublisherTest extends TestCase
     /**
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
-    protected function getMockedPublisher()
+    public function getMockedPublisher()
     {
         $publisher = $this
             ->getMockBuilder('Xi\Filelib\Publisher\Filesystem\SymlinkFilesystemPublisher')
