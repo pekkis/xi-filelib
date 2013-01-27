@@ -27,7 +27,7 @@ class SymfonyRendererTest extends \Xi\Filelib\Tests\TestCase
 
     public function setUp()
     {
-        $this->profile = $this->getMock('Xi\Filelib\File\FileProfile');
+        $this->profile = $this->getMockedFileProfile();
         $this->fiop = $this->getMockedFileOperator();
         $this->fiop
             ->expects($this->any())
