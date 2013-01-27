@@ -2,12 +2,21 @@
 
 namespace Xi\Filelib\Tests;
 
-use Xi\Filelib\FileLibrary;
 use Xi\Filelib\EnqueueableCommand;
 use Xi\Filelib\AbstractOperator;
+use InvalidArgumentException;
 
 class AbstractOperatorTest extends TestCase
 {
+    private $op;
+    private $configuration;
+
+    public function setUp()
+    {
+        $this->configuration = $this->getConfigurationWithMockedObjects();
+        $this->op = $this->getMockedOperator();
+    }
+
     /**
      * @test
      */
@@ -17,128 +26,35 @@ class AbstractOperatorTest extends TestCase
     }
 
     /**
-     * @test
+     * @return \PHPUnit_Framework_MockObject_MockObject
      */
-    public function getBackendShouldDelegateToFilelib()
+    public function getMockedOperator($methods = array())
     {
-        $filelib = $this->getMockedFilelib();
-        $filelib->expects($this->once())->method('getBackend');
 
-        $operator = $this->getMockBuilder('Xi\Filelib\AbstractOperator')
-                         ->setMethods(array())
-                         ->setConstructorArgs(array($filelib))
-                         ->getMockForAbstractClass();
+        $op = $this
+            ->getMockBuilder('Xi\Filelib\AbstractOperator')
+            ->setMethods($methods)
+            ->setConstructorArgs(array($this->configuration))
+            ->getMockForAbstractClass();
 
-        $operator->getBackend();
-
+        return $op;
     }
+
 
     /**
      * @test
      */
-    public function getStorageShouldDelegateToFilelib()
+    public function gettersShouldWork()
     {
-        $filelib = $this->getMockedFilelib();
-        $filelib->expects($this->once())->method('getStorage');
+        $configuration = $this->configuration;
+        $op = $this->getMockedOperator();
 
-        $operator = $this->getMockBuilder('Xi\Filelib\AbstractOperator')
-                         ->setMethods(array())
-                         ->setConstructorArgs(array($filelib))
-                         ->getMockForAbstractClass();
-
-        $operator->getStorage();
-
-    }
-
-    /**
-     * @test
-     */
-    public function getPublisherShouldDelegateToFilelib()
-    {
-        $filelib = $this->getMockedFilelib();
-        $filelib->expects($this->once())->method('getPublisher');
-
-        $operator = $this->getMockBuilder('Xi\Filelib\AbstractOperator')
-                         ->setMethods(array())
-                         ->setConstructorArgs(array($filelib))
-                         ->getMockForAbstractClass();
-
-        $operator->getPublisher();
-
-    }
-
-    /**
-     * @test
-     */
-    public function getAclShouldDelegateToFilelib()
-    {
-        $filelib = $this->getMockedFilelib();
-        $filelib->expects($this->once())->method('getAcl');
-
-        $operator = $this->getMockBuilder('Xi\Filelib\AbstractOperator')
-                         ->setMethods(array())
-                         ->setConstructorArgs(array($filelib))
-                         ->getMockForAbstractClass();
-
-        $operator->getAcl();
-    }
-
-    /**
-     * @test
-     */
-    public function getEventDispatcherShouldDelegateToFilelib()
-    {
-        $filelib = $this->getMockedFilelib();
-        $filelib->expects($this->once())->method('getEventDispatcher');
-
-        $operator = $this->getMockBuilder('Xi\Filelib\AbstractOperator')
-                         ->setMethods(array())
-                         ->setConstructorArgs(array($filelib))
-                         ->getMockForAbstractClass();
-
-        $operator->getEventDispatcher();
-    }
-
-    /**
-     * @test
-     */
-    public function getQueueShouldDelegateToFilelib()
-    {
-        $filelib = $this->getMockedFilelib();
-        $filelib->expects($this->once())->method('getQueue');
-
-        $operator = $this->getMockBuilder('Xi\Filelib\AbstractOperator')
-                         ->setMethods(array())
-                         ->setConstructorArgs(array($filelib))
-                         ->getMockForAbstractClass();
-
-        $operator->getQueue();
-    }
-
-    /**
-     * @test
-     */
-    public function getFilelibShouldReturnFilelib()
-    {
-        $filelib = $this->getMockedFilelib();
-
-        $operator = $this->getMockBuilder('Xi\Filelib\AbstractOperator')
-                         ->setMethods(array())
-                         ->setConstructorArgs(array($filelib))
-                         ->getMockForAbstractClass();
-
-        $this->assertSame($filelib, $operator->getFilelib());
-
-    }
-
-    /**
-     * @return FileLibrary
-     */
-    private function getMockedFilelib()
-    {
-        $mock = $this->getMock('Xi\Filelib\FileLibrary');
-
-        return $mock;
+        $this->assertSame($configuration->getBackend(), $op->getBackend());
+        $this->assertSame($configuration->getAcl(), $op->getAcl());
+        $this->assertSame($configuration->getStorage(), $op->getStorage());
+        $this->assertSame($configuration->getPublisher(), $op->getPublisher());
+        $this->assertSame($configuration->getEventDispatcher(), $op->getEventDispatcher());
+        $this->assertSame($configuration->getQueue(), $op->getQueue());
     }
 
     /**
@@ -147,14 +63,8 @@ class AbstractOperatorTest extends TestCase
      */
     public function gettingInvalidCommandShouldThrowException()
     {
-        $filelib = $this->getMock('Xi\Filelib\FileLibrary');
-        $op = $this->getMockBuilder('Xi\Filelib\AbstractOperator')
-                         ->setMethods(array())
-                         ->setConstructorArgs(array($filelib))
-                         ->getMockForAbstractClass();
-
+        $op = $this->getMockedOperator();
         $op->getCommandStrategy('lussenhof');
-
     }
 
     /**
@@ -163,15 +73,8 @@ class AbstractOperatorTest extends TestCase
      */
     public function settingInvalidCommandShouldThrowException()
     {
-        $filelib = $this->getMock('Xi\Filelib\FileLibrary');
-
-        $op = $this->getMockBuilder('Xi\Filelib\AbstractOperator')
-                         ->setMethods(array())
-                         ->setConstructorArgs(array($filelib))
-                         ->getMockForAbstractClass();
-
+        $op = $this->getMockedOperator();
         $op->setCommandStrategy('lussenhof', EnqueueableCommand::STRATEGY_ASYNCHRONOUS);
-
     }
 
     /**
@@ -180,10 +83,7 @@ class AbstractOperatorTest extends TestCase
      */
     public function generateUuidShouldGenerateUuid()
     {
-        $op = $this->getMockBuilder('Xi\Filelib\AbstractOperator')
-                         ->disableOriginalConstructor()
-                         ->getMockForAbstractClass();
-
+        $op = $this->getMockedOperator();
         $uuid = $op->generateUuid();
         $this->assertRegExp("/^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}$/", $uuid);
     }
@@ -193,24 +93,17 @@ class AbstractOperatorTest extends TestCase
      */
     public function executeOrQueueShouldEnqueueWithAsynchronousStrategy()
     {
-
-        $op = $this->getMockBuilder('Xi\Filelib\AbstractOperator')
-                   ->disableOriginalConstructor()
-                   ->setMethods(array('getCommandStrategy', 'getQueue'))
-                   ->getMock();
+        $op = $this->getMockedOperator(array('getCommandStrategy'));
 
         $command = $this->getMockBuilder('Xi\Filelib\EnqueueableCommand')
                         ->disableOriginalConstructor()
                         ->getMock();
 
-        $queue = $this->getMock('Xi\Filelib\Queue\Queue');
+        $queue = $this->configuration->getQueue();
 
         $op->expects($this->once())->method('getCommandStrategy')
            ->with($this->equalTo('tussi'))
            ->will($this->returnValue(EnqueueableCommand::STRATEGY_ASYNCHRONOUS));
-
-        $op->expects($this->any())->method('getQueue')
-           ->will($this->returnValue($queue));
 
         $queue->expects($this->once())->method('enqueue')
               ->with($this->isInstanceOf('Xi\Filelib\Command'))
@@ -228,23 +121,17 @@ class AbstractOperatorTest extends TestCase
     public function executeOrQueueShouldExecuteWithSynchronousStrategy()
     {
 
-        $op = $this->getMockBuilder('Xi\Filelib\AbstractOperator')
-                   ->disableOriginalConstructor()
-                   ->setMethods(array('getCommandStrategy', 'getQueue'))
-                   ->getMock();
+        $op = $this->getMockedOperator(array('getCommandStrategy'));
 
         $command = $this->getMockBuilder('Xi\Filelib\EnqueueableCommand')
                         ->disableOriginalConstructor()
                         ->getMock();
 
-        $queue = $this->getMock('Xi\Filelib\Queue\Queue');
+        $queue = $this->configuration->getQueue();
 
         $op->expects($this->once())->method('getCommandStrategy')
            ->with($this->equalTo('tussi'))
            ->will($this->returnValue(EnqueueableCommand::STRATEGY_SYNCHRONOUS));
-
-        $op->expects($this->any())->method('getQueue')
-           ->will($this->returnValue($queue));
 
         $queue->expects($this->never())->method('enqueue');
 
@@ -280,23 +167,17 @@ class AbstractOperatorTest extends TestCase
             }
         );
 
-        $op = $this->getMockBuilder('Xi\Filelib\AbstractOperator')
-            ->disableOriginalConstructor()
-            ->setMethods(array('getCommandStrategy', 'getQueue'))
-            ->getMock();
+        $op = $this->getMockedOperator(array('getCommandStrategy'));
 
         $command = $this->getMockBuilder('Xi\Filelib\EnqueueableCommand')
             ->disableOriginalConstructor()
             ->getMock();
 
-        $queue = $this->getMock('Xi\Filelib\Queue\Queue');
+        $queue = $this->configuration->getQueue();
 
         $op->expects($this->once())->method('getCommandStrategy')
             ->with($this->equalTo('tussi'))
             ->will($this->returnValue($strategy));
-
-        $op->expects($this->any())->method('getQueue')
-            ->will($this->returnValue($queue));
 
         $command->expects($this->any())->method('execute')
             ->will($this->returnValue('originalValue'));
@@ -321,9 +202,7 @@ class AbstractOperatorTest extends TestCase
                 array('execute', 'serialize', 'unserialize')
             );
 
-        $op = $this->getMockBuilder('Xi\Filelib\AbstractOperator')
-            ->disableOriginalConstructor()
-            ->getMockForAbstractClass();
+        $op = $this->getMockedOperator();
 
         $fileop = $this->getMockBuilder('Xi\Filelib\File\FileOperator')->disableOriginalConstructor()->getMock();
 

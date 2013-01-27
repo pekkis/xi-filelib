@@ -9,12 +9,12 @@
 
 namespace Xi\Filelib;
 
-use Xi\Filelib\FileLibrary;
+use Xi\Filelib\Configuration;
 use Xi\Filelib\Storage\Storage;
 use Xi\Filelib\Backend\Backend;
 use Xi\Filelib\Publisher\Publisher;
 use Xi\Filelib\Acl\Acl;
-use Xi\Filelib\Command;
+use Xi\Filelib\Queue\Queue;
 use Xi\Filelib\Tool\UuidGenerator\UuidGenerator;
 use Xi\Filelib\Tool\UuidGenerator\PHPUuidGenerator;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -28,13 +28,6 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 abstract class AbstractOperator
 {
     /**
-     * Filelib reference
-     *
-     * @var FileLibrary
-     */
-    protected $filelib;
-
-    /**
      * Commands and their default strategies
      *
      * @var array
@@ -47,9 +40,44 @@ abstract class AbstractOperator
      */
     protected $uuidGenerator;
 
-    public function __construct(FileLibrary $filelib)
+    /**
+     * @var Storage
+     */
+    protected $storage;
+
+    /**
+     * @var Backend
+     */
+    protected $backend;
+
+    /**
+     * @var Publisher
+     */
+    protected $publisher;
+
+    /**
+     * @var Queue
+     */
+    protected $queue;
+
+    /**
+     * @var Acl
+     */
+    protected $acl;
+
+    /**
+     * @var EventDispatcherInterface
+     */
+    protected $eventDispatcher;
+
+    public function __construct(Configuration $configuration)
     {
-        $this->filelib = $filelib;
+        $this->storage = $configuration->getStorage();
+        $this->backend = $configuration->getBackend();
+        $this->publisher = $configuration->getPublisher();
+        $this->queue = $configuration->getQueue();
+        $this->acl = $configuration->getAcl();
+        $this->eventDispatcher = $configuration->getEventDispatcher();
     }
 
     /**
@@ -59,7 +87,7 @@ abstract class AbstractOperator
      */
     public function getBackend()
     {
-        return $this->getFilelib()->getBackend();
+        return $this->backend;
     }
 
     /**
@@ -69,7 +97,7 @@ abstract class AbstractOperator
      */
     public function getStorage()
     {
-        return $this->getFilelib()->getStorage();
+        return $this->storage;
     }
 
     /**
@@ -79,17 +107,7 @@ abstract class AbstractOperator
      */
     public function getPublisher()
     {
-        return $this->getFilelib()->getPublisher();
-    }
-
-    /**
-     * Returns filelib
-     *
-     * @return FileLibrary
-     */
-    public function getFilelib()
-    {
-        return $this->filelib;
+        return $this->publisher;
     }
 
     /**
@@ -99,7 +117,7 @@ abstract class AbstractOperator
      */
     public function getAcl()
     {
-        return $this->getFilelib()->getAcl();
+        return $this->acl;
     }
 
     /**
@@ -109,7 +127,7 @@ abstract class AbstractOperator
      */
     public function getEventDispatcher()
     {
-        return $this->getFilelib()->getEventDispatcher();
+        return $this->eventDispatcher;
     }
 
     /**
@@ -119,7 +137,7 @@ abstract class AbstractOperator
      */
     public function getQueue()
     {
-        return $this->getFilelib()->getQueue();
+        return $this->queue;
     }
 
     private function assertCommandExists($command)

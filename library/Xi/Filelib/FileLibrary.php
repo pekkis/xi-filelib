@@ -90,6 +90,17 @@ class FileLibrary
     private $platform;
 
     /**
+     * @var Configuration
+     */
+    private $configuration;
+
+
+    public function __construct(Configuration $configuration)
+    {
+        $this->configuration = $configuration;
+    }
+
+    /**
      * @return EventDispatcherInterface
      */
     public function getEventDispatcher()

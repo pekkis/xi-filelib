@@ -36,6 +36,12 @@ class TestCase extends \PHPUnit_Framework_TestCase
         return $this->getMock('Xi\Filelib\Acl\Acl');
     }
 
+    public function getMockedQueue()
+    {
+        return $this->getMock('Xi\Filelib\Queue\Queue');
+    }
+
+
     public function getMockedEventDispatcher()
     {
         return $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
@@ -46,6 +52,24 @@ class TestCase extends \PHPUnit_Framework_TestCase
         return $this->getMock('Xi\Filelib\Publisher\Publisher');
     }
 
+    public function getMockedPlatform()
+    {
+        return $this->getMock('Xi\Filelib\Backend\Platform\Platform');
+    }
+
+    public function getMockedBackend()
+    {
+        $backend = $this
+            ->getMockBuilder('Xi\Filelib\Backend\Backend')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        return $backend;
+    }
+
+    /**
+     * @return Configuration
+     */
     public function getConfigurationWithMockedObjects()
     {
         $configuration = new Configuration();
@@ -53,6 +77,9 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $configuration->setPublisher($this->getMockedPublisher());
         $configuration->setEventDispatcher($this->getMockedEventDispatcher());
         $configuration->setStorage($this->getMockedStorage());
+        $configuration->setQueue($this->getMockedQueue());
+        $configuration->setBackend($this->getMockedBackend());
+        $configuration->setPlatform($this->getMockedPlatform());
 
         return $configuration;
     }
