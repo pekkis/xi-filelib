@@ -15,7 +15,7 @@ use \Xi\Filelib\File\Resource;
 /**
  * @group storage
  */
-class MultiStorageTest extends \Xi\Filelib\TestCase
+class MultiStorageTest extends \PHPUnit_Framework_TestCase
 {
     protected $storage;
 
