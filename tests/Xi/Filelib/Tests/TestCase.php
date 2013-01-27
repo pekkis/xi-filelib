@@ -41,7 +41,6 @@ class TestCase extends \PHPUnit_Framework_TestCase
         return $this->getMock('Xi\Filelib\Queue\Queue');
     }
 
-
     public function getMockedEventDispatcher()
     {
         return $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
@@ -67,6 +66,13 @@ class TestCase extends \PHPUnit_Framework_TestCase
         return $backend;
     }
 
+    public function getMockedFileProfile()
+    {
+        return $this->getMockBuilder('Xi\Filelib\File\FileProfile')
+            ->disableOriginalConstructor()
+            ->getMock();
+    }
+
     /**
      * @return Configuration
      */
@@ -83,6 +89,4 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
         return $configuration;
     }
-
-
 }
