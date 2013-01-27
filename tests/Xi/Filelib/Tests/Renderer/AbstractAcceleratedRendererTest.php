@@ -4,7 +4,7 @@ namespace Xi\Filelib\Tests\Renderer;
 
 use Xi\Filelib\Renderer\AbstractAcceleratedRenderer;
 
-class AbstractAcceleratedRendererTest extends \PHPUnit_Framework_TestCase
+class AbstractAcceleratedRendererTest extends \Xi\Filelib\Tests\TestCase
 {
     /**
      * @var AbstractAcceleratedRenderer
@@ -13,9 +13,12 @@ class AbstractAcceleratedRendererTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $filelib = $this->getMock('Xi\Filelib\FileLibrary');
-        $this->renderer = $this->getMockBuilder('Xi\Filelib\Renderer\AbstractAcceleratedRenderer')
-            ->setConstructorArgs(array($filelib))
+        $configuration = $this->getConfigurationWithMockedObjects();
+        $fiop = $this->getMockedFileOperator();
+
+        $this->renderer = $this
+            ->getMockBuilder('Xi\Filelib\Renderer\AbstractAcceleratedRenderer')
+            ->setConstructorArgs(array($configuration, $fiop))
             ->getMockForAbstractClass();
     }
 

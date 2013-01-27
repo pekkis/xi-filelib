@@ -11,14 +11,17 @@ namespace Xi\Filelib\Renderer;
 
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Xi\Filelib\File\File;
-use Xi\Filelib\FileLibrary;
 use Xi\Filelib\Event\FileEvent;
+use Xi\Filelib\Configuration;
+use Xi\Filelib\Publisher\Publisher;
+use Xi\Filelib\Storage\Storage;
+use Xi\Filelib\Acl\Acl;
+use Xi\Filelib\File\FileOperator;
 
-abstract class AbstractRenderer
+abstract class AbstractRenderer implements Renderer
 {
-
     /**
-     * @var Default options
+     * @var array Default options
      */
     private $defaultOptions = array(
         'download' => false,
@@ -27,20 +30,44 @@ abstract class AbstractRenderer
     );
 
     /**
-     * @var FileLibrary
+     * @var Storage
      */
-    protected $filelib;
+    private $storage;
 
-    public function __construct(FileLibrary $filelib)
+    /**
+     * @var Publisher
+     */
+    private $publisher;
+
+    /**
+     * @var Acl
+     */
+    private $acl;
+
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $eventDispatcher;
+
+    /**
+     * @var FileOperator
+     */
+    protected $fileOperator;
+
+    public function __construct(Configuration $configuration, FileOperator $fileOperator)
     {
-        $this->filelib = $filelib;
+        $this->storage = $configuration->getStorage();
+        $this->publisher = $configuration->getPublisher();
+        $this->acl = $configuration->getAcl();
+        $this->eventDispatcher = $configuration->getEventDispatcher();
+        $this->fileOperator = $fileOperator;
     }
 
     /**
      * Returns url to a file
      *
      * @param  File   $file
-     * @param  type   $options
+     * @param  array $options
      * @return string
      */
     public function getUrl(File $file, $options = array())
@@ -52,7 +79,7 @@ abstract class AbstractRenderer
         }
 
         // @todo: simplify. Publisher should need the string only!
-        $provider = $this->filelib->getFileOperator()->getVersionProvider($file, $options['version']);
+        $provider = $this->fileOperator->getVersionProvider($file, $options['version']);
         $url = $this->getPublisher()->getUrlVersion($file, $options['version'], $provider);
 
         return $url;
@@ -74,17 +101,17 @@ abstract class AbstractRenderer
      *
      * @return Publisher
      */
-    public function getPublisher()
+    protected function getPublisher()
     {
-        return $this->filelib->getPublisher();
+        return $this->publisher;
     }
 
     /**
      * @return EventDispatcherInterface
      */
-    public function getEventDispatcher()
+    protected function getEventDispatcher()
     {
-        return $this->filelib->getEventDispatcher();
+        return $this->eventDispatcher;
     }
 
     /**
@@ -92,9 +119,9 @@ abstract class AbstractRenderer
      *
      * @return Acl
      */
-    public function getAcl()
+    protected function getAcl()
     {
-        return $this->filelib->getAcl();
+        return $this->acl;
     }
 
     /**
@@ -102,9 +129,9 @@ abstract class AbstractRenderer
      *
      * @return Storage
      */
-    public function getStorage()
+    protected function getStorage()
     {
-        return $this->filelib->getStorage();
+        return $this->storage;
     }
 
     /**
