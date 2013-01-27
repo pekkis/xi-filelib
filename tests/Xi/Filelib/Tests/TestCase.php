@@ -6,6 +6,16 @@ use Xi\Filelib\Configuration;
 
 class TestCase extends \PHPUnit_Framework_TestCase
 {
+    public function getMockedFilelib()
+    {
+        $filelib = $this
+            ->getMockBuilder('Xi\Filelib\FileLibrary')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        return $filelib;
+    }
+
     public function getMockedFileOperator()
     {
         $fileop = $this
