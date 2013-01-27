@@ -23,6 +23,11 @@ use Xi\Filelib\Exception\InvalidArgumentException;
 class Configuration
 {
     /**
+     * @var string
+     */
+    private $tempDir;
+
+    /**
      * @var EventDispatcherInterface
      */
     private $eventDispatcher;
@@ -46,11 +51,6 @@ class Configuration
      * @var Acl
      */
     private $acl;
-
-    /**
-     * @var string
-     */
-    private $tempDir;
 
     /**
      * @var Queue
