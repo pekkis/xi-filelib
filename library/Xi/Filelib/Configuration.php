@@ -278,6 +278,4 @@ class Configuration
     {
         return $this->platform;
     }
-
-
 }

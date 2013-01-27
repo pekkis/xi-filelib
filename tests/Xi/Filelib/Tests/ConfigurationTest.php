@@ -4,7 +4,7 @@ namespace Xi\Filelib\Tests;
 
 use Xi\Filelib\Configuration;
 
-class ConfigurationTest extends \PHPUnit_Framework_TestCase
+class ConfigurationTest extends TestCase
 {
     public function setUp()
     {
@@ -121,11 +121,25 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function tempDirShouldDefaultToSystemTempDir()
+    public function tempDirShouldDefaultToSystemTempDirAnd()
     {
         $configuration = new Configuration();
         $this->assertEquals(sys_get_temp_dir(), $configuration->getTempDir());
     }
+
+    /**
+     * @test
+     */
+    public function setTempDirShouldObeySetter()
+    {
+        $configuration = new Configuration();
+        $this->assertSame(
+            $configuration,
+            $configuration->setTempDir(ROOT_TESTS . '/data/temp')
+        );
+        $this->assertEquals(ROOT_TESTS . '/data/temp', $configuration->getTempDir());
+    }
+
 
     /**
      * @test
