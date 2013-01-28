@@ -18,7 +18,7 @@ use Xi\Filelib\Folder\Folder;
 use Xi\Filelib\File\Upload\FileUpload;
 use Xi\Filelib\Plugin\VersionProvider\VersionProvider;
 use Xi\Filelib\Event\FileProfileEvent;
-use Xi\Filelib\EnqueueableCommand;
+use Xi\Filelib\Command\EnqueueableCommand;
 use Xi\Filelib\Tool\TypeResolver\TypeResolver;
 use Xi\Filelib\Tool\TypeResolver\StupidTypeResolver;
 use Xi\Filelib\Backend\Finder\FileFinder;
@@ -42,8 +42,6 @@ class FileOperator extends AbstractOperator
     const COMMAND_COPY = 'copy';
 
     /**
-     * Default command strategies
-     *
      * @var array
      */
     protected $commandStrategies = array(

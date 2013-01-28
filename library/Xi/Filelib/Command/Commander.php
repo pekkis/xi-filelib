@@ -19,5 +19,5 @@ interface Commander
      *
      * @return array
      */
-    public function getCommandStrategies();
+    public function getCommands();
 }

@@ -26,10 +26,31 @@ class FolderOperatorTest extends \Xi\Filelib\Tests\TestCase
 
     private $backend;
 
+    private $operatorManager;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    private $commandFactory;
+
     public function setUp()
     {
         $this->configuration = $this->getConfigurationWithMockedObjects();
-        $this->op = new FolderOperator($this->configuration);
+        $this->operatorManager = $this->getMockedOperatorManager();
+
+        $this->op = $this
+            ->getMockBuilder('Xi\Filelib\Operator\FolderOperator')
+            ->setConstructorArgs(array($this->configuration, $this->operatorManager))
+            ->setMethods(array('getCommandFactory'))
+            ->getMock();
+
+        $this->commandFactory = $this->getMockedCommandFactory();
+
+        $this->op
+            ->expects($this->any())
+            ->method('getCommandFactory')
+            ->will($this->returnValue($this->commandFactory));
+
         $this->backend = $this->configuration->getBackend();
     }
 
@@ -44,80 +65,28 @@ class FolderOperatorTest extends \Xi\Filelib\Tests\TestCase
     /**
      * @test
      */
-    public function strategiesShouldDefaultToSynchronous()
+    public function shouldContainCorrectCommandsAndStrategies()
     {
         $this->assertEquals(
-            EnqueueableCommand::STRATEGY_SYNCHRONOUS,
-            $this->op->getCommandStrategy(FolderOperator::COMMAND_CREATE)
-        );
-    }
-
-    public function provideCommandMethods()
-    {
-        return array(
             array(
-                'Xi\Filelib\Folder\Command\DeleteFolderCommand',
-                'delete',
-                FolderOperator::COMMAND_DELETE,
-                EnqueueableCommand::STRATEGY_ASYNCHRONOUS,
-                true
+                FolderOperator::COMMAND_CREATE => array(
+                    'Xi\Filelib\Folder\Command\CreateFolderCommand',
+                    EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+                ),
+                FolderOperator::COMMAND_DELETE => array(
+                    'Xi\Filelib\Folder\Command\DeleteFolderCommand',
+                    EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+                ),
+                FolderOperator::COMMAND_UPDATE => array(
+                    'Xi\Filelib\Folder\Command\UpdateFolderCommand',
+                    EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+                ),
+                FolderOperator::COMMAND_CREATE_BY_URL => array(
+                    'Xi\Filelib\Folder\Command\CreateByUrlFolderCommand',
+                    EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+                ),
             ),
-
-            array(
-                'Xi\Filelib\Folder\Command\DeleteFolderCommand',
-                'delete',
-                FolderOperator::COMMAND_DELETE,
-                EnqueueableCommand::STRATEGY_SYNCHRONOUS,
-                false
-            ),
-
-            array(
-                'Xi\Filelib\Folder\Command\CreateFolderCommand',
-                'create',
-                FolderOperator::COMMAND_CREATE,
-                EnqueueableCommand::STRATEGY_ASYNCHRONOUS,
-                true
-            ),
-
-            array(
-                'Xi\Filelib\Folder\Command\CreateFolderCommand',
-                'create',
-                FolderOperator::COMMAND_CREATE,
-                EnqueueableCommand::STRATEGY_SYNCHRONOUS,
-                false
-            ),
-
-            array(
-                'Xi\Filelib\Folder\Command\UpdateFolderCommand',
-                'update',
-                FolderOperator::COMMAND_UPDATE,
-                EnqueueableCommand::STRATEGY_ASYNCHRONOUS,
-                true
-            ),
-
-            array(
-                'Xi\Filelib\Folder\Command\UpdateFolderCommand',
-                'update',
-                FolderOperator::COMMAND_UPDATE,
-                EnqueueableCommand::STRATEGY_SYNCHRONOUS,
-                false
-            ),
-
-            array(
-                'Xi\Filelib\Folder\Command\CreateByUrlFolderCommand',
-                'createByUrl',
-                FolderOperator::COMMAND_CREATE_BY_URL,
-                EnqueueableCommand::STRATEGY_ASYNCHRONOUS,
-                true
-            ),
-
-            array(
-                'Xi\Filelib\Folder\Command\CreateByUrlFolderCommand',
-                'createByUrl',
-                FolderOperator::COMMAND_CREATE_BY_URL,
-                EnqueueableCommand::STRATEGY_SYNCHRONOUS,
-                false
-            ),
+            $this->op->getCommands()
         );
     }
 

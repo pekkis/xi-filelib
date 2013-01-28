@@ -26,18 +26,23 @@ class CommandFactoryTest extends \Xi\Filelib\Tests\TestCase
         $this->commander = $this->getMock('Xi\Filelib\Command\Commander');
         $this->commander
             ->expects($this->any())
-            ->method('getCommandStrategies')
+            ->method('getCommands')
             ->will(
                 $this->returnValue(
                     array(
-                        'tussi' => EnqueueableCommand::STRATEGY_ASYNCHRONOUS,
-                        'lussi' => EnqueueableCommand::STRATEGY_SYNCHRONOUS
+                        'tussi' => array(
+                            'Manatee\Tussi',
+                            EnqueueableCommand::STRATEGY_ASYNCHRONOUS,
+                         ),
+                        'lussi' => array(
+                            'Manatee\Lussi',
+                            EnqueueableCommand::STRATEGY_SYNCHRONOUS
+                        ),
                     )
                 )
             );
 
         $this->queue = $this->getMockedQueue();
-
         $this->commandFactory = new CommandFactory($this->queue, $this->commander);
     }
 
@@ -56,10 +61,16 @@ class CommandFactoryTest extends \Xi\Filelib\Tests\TestCase
     {
         $this->assertAttributeEquals(
             array(
-                'tussi' => EnqueueableCommand::STRATEGY_ASYNCHRONOUS,
-                'lussi' => EnqueueableCommand::STRATEGY_SYNCHRONOUS
+                'tussi' => array(
+                    'Manatee\Tussi',
+                    EnqueueableCommand::STRATEGY_ASYNCHRONOUS,
+                ),
+                'lussi' => array(
+                    'Manatee\Lussi',
+                    EnqueueableCommand::STRATEGY_SYNCHRONOUS
+                ),
             ),
-            'commandStrategies',
+            'commands',
             $this->commandFactory
         );
     }
@@ -101,7 +112,10 @@ class CommandFactoryTest extends \Xi\Filelib\Tests\TestCase
             $this->commandFactory->getCommandStrategy('tussi')
         );
 
-        $this->commandFactory->setCommandStrategy('tussi', EnqueueableCommand::STRATEGY_SYNCHRONOUS);
+        $this->assertSame(
+            $this->commandFactory,
+            $this->commandFactory->setCommandStrategy('tussi', EnqueueableCommand::STRATEGY_SYNCHRONOUS)
+        );
 
         $this->assertEquals(
             EnqueueableCommand::STRATEGY_SYNCHRONOUS,
@@ -193,6 +207,15 @@ class CommandFactoryTest extends \Xi\Filelib\Tests\TestCase
         $ret = $this->commandFactory->executeOrQueue($command, $commandType, $callbacks);
         $this->assertEquals($expectedValue, $ret);
 
+    }
+
+    /**
+     * @test
+     */
+    public function generateUuidShouldGenerateUuid()
+    {
+        $uuid = $this->commandFactory->generateUuid();
+        $this->assertRegExp("/^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}$/", $uuid);
     }
 
     /**

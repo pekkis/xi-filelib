@@ -7,11 +7,15 @@ use Xi\Filelib\Operator\AbstractOperator;
 class AbstractOperatorTest extends \Xi\Filelib\Tests\TestCase
 {
     private $op;
+
     private $configuration;
+
+    private $operatorManager;
 
     public function setUp()
     {
         $this->configuration = $this->getConfigurationWithMockedObjects();
+        $this->operatorManager = $this->getMockedOperatorManager();
         $this->op = $this->getMockedOperator();
     }
 
@@ -22,22 +26,6 @@ class AbstractOperatorTest extends \Xi\Filelib\Tests\TestCase
     {
         $this->assertTrue(class_exists('Xi\Filelib\Operator\AbstractOperator'));
     }
-
-    /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
-     */
-    public function getMockedOperator($methods = array())
-    {
-
-        $op = $this
-            ->getMockBuilder('Xi\Filelib\Operator\AbstractOperator')
-            ->setMethods($methods)
-            ->setConstructorArgs(array($this->configuration))
-            ->getMockForAbstractClass();
-
-        return $op;
-    }
-
 
     /**
      * @test
@@ -55,14 +43,19 @@ class AbstractOperatorTest extends \Xi\Filelib\Tests\TestCase
     }
 
     /**
-     *
-     * @test
+     * @return \PHPUnit_Framework_MockObject_MockObject
      */
-    public function generateUuidShouldGenerateUuid()
+    protected function getMockedOperator($methods = array())
     {
-        $op = $this->getMockedOperator();
-        $uuid = $op->generateUuid();
-        $this->assertRegExp("/^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}$/", $uuid);
+
+        $op = $this
+            ->getMockBuilder('Xi\Filelib\Operator\AbstractOperator')
+            ->setMethods($methods)
+            ->setConstructorArgs(array($this->configuration, $this->operatorManager))
+            ->getMockForAbstractClass();
+
+        return $op;
     }
+
 
 }

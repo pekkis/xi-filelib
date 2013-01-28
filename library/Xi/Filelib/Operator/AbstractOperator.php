@@ -18,8 +18,8 @@ use Xi\Filelib\Queue\Queue;
 use Xi\Filelib\Tool\UuidGenerator\UuidGenerator;
 use Xi\Filelib\Tool\UuidGenerator\PHPUuidGenerator;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Xi\Filelib\Command\CommandFactory;
 use Xi\Filelib\Command\Commander;
-use Xi\Filelib\Command\Commandeerable;
 
 /**
  * Abstract convenience class for operators
@@ -27,18 +27,12 @@ use Xi\Filelib\Command\Commandeerable;
  * @author pekkis
  *
  */
-abstract class AbstractOperator implements Commandeerable
+abstract class AbstractOperator implements Commander
 {
     /**
      * @var OperatorManager
      */
     protected $operatorManager;
-
-    /**
-     *
-     * @var UuidGenerator
-     */
-    protected $uuidGenerator;
 
     /**
      * @var Storage
@@ -70,7 +64,12 @@ abstract class AbstractOperator implements Commandeerable
      */
     protected $eventDispatcher;
 
+    /**
+     * @var array
+     */
     protected $commandStrategies = array();
+
+    private $commandFactory;
 
     public function __construct(Configuration $configuration, OperatorManager $operatorManager)
     {
@@ -80,10 +79,13 @@ abstract class AbstractOperator implements Commandeerable
         $this->publisher = $configuration->getPublisher();
         $this->acl = $configuration->getAcl();
         $this->eventDispatcher = $configuration->getEventDispatcher();
-        $this->commander = new Commander($configuration->getQueue(), $this);
+        $this->commandFactory = new CommandFactory($configuration->getQueue(), $this);
     }
 
-    public function getCommandStrategies()
+    /**
+     * @return array
+     */
+    public function getCommands()
     {
         return $this->commandStrategies;
     }
@@ -138,25 +140,9 @@ abstract class AbstractOperator implements Commandeerable
         return $this->eventDispatcher;
     }
 
-    /**
-     * Generates UUID
-     *
-     * @return string
-     */
-    public function generateUuid()
+    protected function getCommandFactory()
     {
-        return $this->getUuidGenerator()->v4();
+        return $this->commandFactory;
     }
 
-    /**
-     * @return UuidGenerator
-     */
-    protected function getUuidGenerator()
-    {
-        if (!$this->uuidGenerator) {
-            $this->uuidGenerator = new PHPUuidGenerator();
-        }
-
-        return $this->uuidGenerator;
-    }
 }

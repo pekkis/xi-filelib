@@ -33,6 +33,33 @@ class TestCase extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    public function getMockedOperatorManager()
+    {
+        $manager = $this
+            ->getMockBuilder('Xi\Filelib\Operator\OperatorManager')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        return $manager;
+    }
+
+
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    public function getMockedCommandFactory()
+    {
+        $commandFactory = $this
+            ->getMockBuilder('Xi\Filelib\Command\CommandFactory')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        return $commandFactory;
+    }
+
+    /**
      * @param array $methods
      * @return \PHPUnit_Framework_MockObject_MockObject
      */

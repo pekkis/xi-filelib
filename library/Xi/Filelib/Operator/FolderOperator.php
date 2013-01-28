@@ -65,10 +65,10 @@ class FolderOperator extends AbstractOperator
      */
     public function create(Folder $folder)
     {
-        $command = $this->commander->createCommand('Xi\Filelib\Folder\Command\CreateFolderCommand', array(
+        $command = $this->getCommandFactory()->createCommand('Xi\Filelib\Folder\Command\CreateFolderCommand', array(
             $this, $folder
         ));
-        return $this->commander->executeOrQueue($command, self::COMMAND_CREATE);
+        return $this->getCommandFactory()->executeOrQueue($command, self::COMMAND_CREATE);
     }
 
     /**
@@ -78,11 +78,11 @@ class FolderOperator extends AbstractOperator
      */
     public function delete(Folder $folder)
     {
-        $command = $this->commander->createCommand('Xi\Filelib\Folder\Command\DeleteFolderCommand', array(
+        $command = $this->getCommandFactory()->createCommand('Xi\Filelib\Folder\Command\DeleteFolderCommand', array(
             $this->operatorManager, $folder
         ));
 
-        return $this->commander->executeOrQueue($command, self::COMMAND_DELETE);
+        return $this->getCommandFactory()->executeOrQueue($command, self::COMMAND_DELETE);
 
     }
 
@@ -93,10 +93,10 @@ class FolderOperator extends AbstractOperator
      */
     public function update(Folder $folder)
     {
-        $command = $this->commander->createCommand('Xi\Filelib\Folder\Command\UpdateFolderCommand', array(
+        $command = $this->getCommandFactory()->createCommand('Xi\Filelib\Folder\Command\UpdateFolderCommand', array(
             $this->operatorManager, $folder
         ));
-        return $this->commander->executeOrQueue($command, self::COMMAND_UPDATE);
+        return $this->getCommandFactory()->executeOrQueue($command, self::COMMAND_UPDATE);
     }
 
     /**
@@ -141,10 +141,10 @@ class FolderOperator extends AbstractOperator
 
     public function createByUrl($url)
     {
-        $command = $this->commander->createCommand('Xi\Filelib\Folder\Command\CreateByUrlFolderCommand', array(
+        $command = $this->getCommandFactory()->createCommand('Xi\Filelib\Folder\Command\CreateByUrlFolderCommand', array(
             $this->operatorManager, $url
         ));
-        return $this->commander->executeOrQueue($command, self::COMMAND_CREATE_BY_URL);
+        return $this->getCommandFactory()->executeOrQueue($command, self::COMMAND_CREATE_BY_URL);
     }
 
     /**
