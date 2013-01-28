@@ -19,7 +19,7 @@ class AbstractRendererTest extends \Xi\Filelib\Tests\TestCase
     public function setUp()
     {
         $this->fiop = $this
-            ->getMockBuilder('Xi\Filelib\File\FileOperator')
+            ->getMockBuilder('Xi\Filelib\Operator\FileOperator')
             ->disableOriginalConstructor()
             ->getMock();
 

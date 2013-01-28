@@ -7,13 +7,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Xi\Filelib\Folder;
+namespace Xi\Filelib\Operator;
 
-use Xi\Filelib\AbstractOperator;
 use Xi\Filelib\FilelibException;
 use Xi\Filelib\Folder\Folder;
-use Xi\Filelib\File\FileOperator;
-use Xi\Filelib\EnqueueableCommand;
+use Xi\Filelib\Command\EnqueueableCommand;
 use Xi\Filelib\Backend\Finder\FolderFinder;
 use Xi\Filelib\Backend\Finder\FileFinder;
 use ArrayIterator;
@@ -38,8 +36,6 @@ class FolderOperator extends AbstractOperator
         self::COMMAND_CREATE_BY_URL => EnqueueableCommand::STRATEGY_SYNCHRONOUS,
     );
 
-    private $fileOperator;
-
     /**
      * Returns directory route for folder
      *
@@ -63,32 +59,16 @@ class FolderOperator extends AbstractOperator
     }
 
     /**
-     * Returns an instance of the currently set folder class
-     *
-     * @param array $data Data
-     */
-    public function getInstance(array $data = array())
-    {
-        $folder = new Folder();
-        if ($data) {
-            $folder->fromArray($data);
-        }
-
-        return $folder;
-    }
-
-    /**
      * Creates a folder
      *
      * @param Folder $folder
      */
     public function create(Folder $folder)
     {
-        $command = $this->createCommand('Xi\Filelib\Folder\Command\CreateFolderCommand', array(
+        $command = $this->commander->createCommand('Xi\Filelib\Folder\Command\CreateFolderCommand', array(
             $this, $folder
         ));
-
-        return $this->executeOrQueue($command, self::COMMAND_CREATE);
+        return $this->commander->executeOrQueue($command, self::COMMAND_CREATE);
     }
 
     /**
@@ -98,11 +78,11 @@ class FolderOperator extends AbstractOperator
      */
     public function delete(Folder $folder)
     {
-        $command = $this->createCommand('Xi\Filelib\Folder\Command\DeleteFolderCommand', array(
-            $this, $this->getFileOperator(), $folder
+        $command = $this->commander->createCommand('Xi\Filelib\Folder\Command\DeleteFolderCommand', array(
+            $this->operatorManager, $folder
         ));
 
-        return $this->executeOrQueue($command, self::COMMAND_DELETE);
+        return $this->commander->executeOrQueue($command, self::COMMAND_DELETE);
 
     }
 
@@ -113,11 +93,10 @@ class FolderOperator extends AbstractOperator
      */
     public function update(Folder $folder)
     {
-        $command = $this->createCommand('Xi\Filelib\Folder\Command\UpdateFolderCommand', array(
-            $this, $this->getFileOperator(), $folder
+        $command = $this->commander->createCommand('Xi\Filelib\Folder\Command\UpdateFolderCommand', array(
+            $this->operatorManager, $folder
         ));
-
-        return $this->executeOrQueue($command, self::COMMAND_UPDATE);
+        return $this->commander->executeOrQueue($command, self::COMMAND_UPDATE);
     }
 
     /**
@@ -162,11 +141,10 @@ class FolderOperator extends AbstractOperator
 
     public function createByUrl($url)
     {
-        $command = $this->createCommand('Xi\Filelib\Folder\Command\CreateByUrlFolderCommand', array(
-            $this, $url
+        $command = $this->commander->createCommand('Xi\Filelib\Folder\Command\CreateByUrlFolderCommand', array(
+            $this->operatorManager, $url
         ));
-
-        return $this->executeOrQueue($command, self::COMMAND_CREATE_BY_URL);
+        return $this->commander->executeOrQueue($command, self::COMMAND_CREATE_BY_URL);
     }
 
     /**
@@ -213,26 +191,4 @@ class FolderOperator extends AbstractOperator
 
         return $files;
     }
-
-    /**
-     *
-     * @return FileOperator
-     */
-    public function getFileOperator()
-    {
-        return $this->fileOperator;
-    }
-
-    /**
-     * @param $fileOperator
-     * @return FolderOperator
-     */
-    public function injectFileOperator(FileOperator $fileOperator)
-    {
-        $this->fileOperator = $fileOperator;
-
-        return $this;
-    }
-
-
 }

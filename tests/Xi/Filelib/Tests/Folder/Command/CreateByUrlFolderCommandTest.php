@@ -3,7 +3,7 @@
 namespace Xi\Filelib\Tests\Folder\Command;
 
 use Xi\Filelib\FileLibrary;
-use Xi\Filelib\Folder\FolderOperator;
+use Xi\Filelib\Operator\FolderOperator;
 use Xi\Filelib\Folder\Folder;
 use Xi\Filelib\Folder\Command\CreateByUrlFolderCommand;
 
@@ -26,7 +26,7 @@ class CreateByUrlFolderCommandTest extends \Xi\Filelib\Tests\TestCase
     {
         $filelib = $this->getMock('Xi\Filelib\FileLibrary');
 
-        $op = $this->getMockBuilder('Xi\Filelib\Folder\FolderOperator')
+        $op = $this->getMockBuilder('Xi\Filelib\Operator\FolderOperator')
                     ->setConstructorArgs(array($filelib))
                     ->setMethods(array('createCommand'))
                     ->getMock();
@@ -144,7 +144,7 @@ class CreateByUrlFolderCommandTest extends \Xi\Filelib\Tests\TestCase
     public function createByUrlShouldExitEarlyIfFolderExists()
     {
         $op = $this
-            ->getMockBuilder('Xi\Filelib\Folder\FolderOperator')
+            ->getMockBuilder('Xi\Filelib\Operator\FolderOperator')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -174,7 +174,7 @@ class CreateByUrlFolderCommandTest extends \Xi\Filelib\Tests\TestCase
     protected function getMockedOp()
     {
         $op = $this
-            ->getMockBuilder('Xi\Filelib\Folder\FolderOperator')
+            ->getMockBuilder('Xi\Filelib\Operator\FolderOperator')
             ->disableOriginalConstructor()
             ->setMethods(array('findRoot', 'findByUrl', 'createCommand'))
             ->getMock();

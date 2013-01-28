@@ -9,7 +9,7 @@
 
 namespace Xi\Filelib\File\Command;
 
-use Xi\Filelib\File\FileOperator;
+use Xi\Filelib\Operator\FileOperator;
 use Xi\Filelib\Folder\Folder;
 use Xi\Filelib\File\File;
 use Xi\Filelib\File\Resource;

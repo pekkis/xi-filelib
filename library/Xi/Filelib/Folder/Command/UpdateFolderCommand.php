@@ -9,8 +9,8 @@
 
 namespace Xi\Filelib\Folder\Command;
 
-use Xi\Filelib\Folder\FolderOperator;
-use Xi\Filelib\File\FileOperator;
+use Xi\Filelib\Operator\FolderOperator;
+use Xi\Filelib\Operator\FileOperator;
 use Xi\Filelib\Folder\Folder;
 use Xi\Filelib\Event\FolderEvent;
 

@@ -13,7 +13,7 @@ use Xi\Filelib\File\File;
 use Xi\Filelib\Publisher\Publisher;
 use Xi\Filelib\Plugin\VersionProvider\VersionProvider;
 use Xi\Filelib\Storage\Storage;
-use Xi\Filelib\File\FileOperator;
+use Xi\Filelib\Operator\FileOperator;
 
 /**
  * Publishes files in a filesystem by retrieving them from storage and creating a copy

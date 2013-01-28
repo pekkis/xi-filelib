@@ -33,7 +33,7 @@ class ChangeFormatPluginTest extends TestCase
         parent::setUp();
 
         $this->fileOperator = $this
-            ->getMockBuilder('Xi\Filelib\File\FileOperator')
+            ->getMockBuilder('Xi\Filelib\Operator\FileOperator')
             ->disableOriginalConstructor()
             ->getMock();
 

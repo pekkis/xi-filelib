@@ -25,7 +25,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     public function getMockedFileOperator()
     {
         $fileop = $this
-            ->getMockBuilder('Xi\Filelib\File\FileOperator')
+            ->getMockBuilder('Xi\Filelib\Operator\FileOperator')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -39,7 +39,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     public function getConfiguredMockedFileOperator(Configuration $configuration, $methods = array())
     {
         $fileop = $this
-            ->getMockBuilder('Xi\Filelib\File\FileOperator')
+            ->getMockBuilder('Xi\Filelib\Operator\FileOperator')
             ->setConstructorArgs(array($configuration))
             ->setMethods($methods)
             ->getMock();
@@ -53,7 +53,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     public function getMockedFolderOperator()
     {
         $folderop = $this
-            ->getMockBuilder('Xi\Filelib\Folder\FolderOperator')
+            ->getMockBuilder('Xi\Filelib\Operator\FolderOperator')
             ->disableOriginalConstructor()
             ->getMock();
 

@@ -7,11 +7,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Xi\Filelib\File;
+namespace Xi\Filelib\Operator;
 
 use Xi\Filelib\FileLibrary;
-use Xi\Filelib\Folder\FolderOperator;
-use Xi\Filelib\AbstractOperator;
 use Xi\Filelib\FilelibException;
 use Xi\Filelib\Plugin\Plugin;
 use InvalidArgumentException;
@@ -24,6 +22,7 @@ use Xi\Filelib\EnqueueableCommand;
 use Xi\Filelib\Tool\TypeResolver\TypeResolver;
 use Xi\Filelib\Tool\TypeResolver\StupidTypeResolver;
 use Xi\Filelib\Backend\Finder\FileFinder;
+use Xi\Filelib\File\FileProfile;
 use ArrayIterator;
 
 /**
@@ -67,27 +66,6 @@ class FileOperator extends AbstractOperator
      * @var TypeResolver
      */
     private $typeResolver;
-
-    /**
-     * @var FolderOperator
-     */
-    private $folderOperator;
-
-    /**
-     * Returns a file
-     *
-     * @param  mixed $data Data as array or a file instance
-     * @return File
-     */
-    public function getInstance($data = array())
-    {
-        $file = new File();
-        if ($data) {
-            $file->fromArray($data);
-        }
-
-        return $file;
-    }
 
     /**
      * Adds a file profile
@@ -341,15 +319,6 @@ class FileOperator extends AbstractOperator
     }
 
     /**
-     *
-     * @return FolderOperator
-     */
-    public function getFolderOperator()
-    {
-        return $this->folderOperator;
-    }
-
-    /**
      * @return TypeResolver
      */
     public function getTypeResolver()
@@ -370,16 +339,6 @@ class FileOperator extends AbstractOperator
     {
         $this->typeResolver = $typeResolver;
 
-        return $this;
-    }
-
-    /**
-     * @param $folderOperator
-     * @return FileOperator
-     */
-    public function injectFolderOperator(FolderOperator $folderOperator)
-    {
-        $this->folderOperator = $folderOperator;
         return $this;
     }
 }

@@ -16,7 +16,7 @@ use Xi\Filelib\Configuration;
 use Xi\Filelib\Publisher\Publisher;
 use Xi\Filelib\Storage\Storage;
 use Xi\Filelib\Acl\Acl;
-use Xi\Filelib\File\FileOperator;
+use Xi\Filelib\Operator\FileOperator;
 
 abstract class AbstractRenderer implements Renderer
 {

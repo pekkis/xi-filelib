@@ -14,7 +14,7 @@ use Xi\Filelib\File\File;
 use Xi\Filelib\File\Resource;
 use Xi\Filelib\Storage\Storage;
 use Xi\Filelib\Publisher\Publisher;
-use Xi\Filelib\File\FileOperator;
+use Xi\Filelib\Operator\FileOperator;
 use Xi\Filelib\Plugin\VersionProvider\AbstractVersionProvider;
 use Xi\Filelib\Event\FileEvent;
 use Xi\Filelib\Event\ResourceEvent;
@@ -55,7 +55,7 @@ class AbstractVersionProviderTest extends TestCase
         $this->publisher = $this->getMock('Xi\Filelib\Publisher\Publisher');
 
         $this->fileOperator = $this
-            ->getMockBuilder('Xi\Filelib\File\FileOperator')
+            ->getMockBuilder('Xi\Filelib\Operator\FileOperator')
             ->disableOriginalConstructor()
             ->getMock();
 

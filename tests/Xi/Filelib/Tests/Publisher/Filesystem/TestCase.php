@@ -138,7 +138,7 @@ class TestCase extends \Xi\Filelib\Tests\TestCase
 
         $this->plinker = $plinker;
 
-        $this->fileOperator = $this->getMockBuilder('Xi\Filelib\File\FileOperator')
+        $this->fileOperator = $this->getMockBuilder('Xi\Filelib\Operator\FileOperator')
             ->disableOriginalConstructor()
             ->getMock();
     }

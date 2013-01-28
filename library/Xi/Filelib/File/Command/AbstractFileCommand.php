@@ -9,7 +9,7 @@
 
 namespace Xi\Filelib\File\Command;
 
-use Xi\Filelib\File\FileOperator;
+use Xi\Filelib\Operator\FileOperator;
 use Xi\Filelib\AbstractCommand;
 
 abstract class AbstractFileCommand extends AbstractCommand implements FileCommand

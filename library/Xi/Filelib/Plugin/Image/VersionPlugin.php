@@ -11,7 +11,7 @@ namespace Xi\Filelib\Plugin\Image;
 
 use Xi\Filelib\Configurator;
 use Xi\Filelib\File\File;
-use Xi\Filelib\File\FileOperator;
+use Xi\Filelib\Operator\FileOperator;
 use Xi\Filelib\Plugin\VersionProvider\AbstractVersionProvider;
 use Xi\Filelib\Storage\Storage;
 use Xi\Filelib\Publisher\Publisher;

@@ -13,7 +13,7 @@ use Xi\Filelib\Publisher\Publisher;
 use Xi\Filelib\File\File;
 use Xi\Filelib\FilelibException;
 use Xi\Filelib\Plugin\VersionProvider\VersionProvider;
-use Xi\Filelib\File\FileOperator;
+use Xi\Filelib\Operator\FileOperator;
 use Xi\Filelib\Storage\FilesystemStorage;
 
 /**

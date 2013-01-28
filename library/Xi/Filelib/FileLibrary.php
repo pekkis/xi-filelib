@@ -9,8 +9,8 @@
 
 namespace Xi\Filelib;
 
-use Xi\Filelib\Folder\FolderOperator;
-use Xi\Filelib\File\FileOperator;
+use Xi\Filelib\Operator\FolderOperator;
+use Xi\Filelib\Operator\FileOperator;
 use Xi\Filelib\Plugin\Plugin;
 use Xi\Filelib\File\FileProfile;
 use Xi\Filelib\Event\PluginEvent;

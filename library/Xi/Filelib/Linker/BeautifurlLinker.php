@@ -13,7 +13,7 @@ use Xi\Filelib\Linker\AbstractLinker;
 use Xi\Filelib\Linker\Linker;
 use Xi\Filelib\File\File;
 use Xi\Filelib\Tool\Slugifier\Slugifier;
-use Xi\Filelib\Folder\FolderOperator;
+use Xi\Filelib\Operator\FolderOperator;
 
 /**
  * Creates beautifurls(tm) from the virtual directory structure and file names.

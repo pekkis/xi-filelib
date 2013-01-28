@@ -9,7 +9,7 @@
 
 namespace Xi\Filelib\Folder\Command;
 
-use Xi\Filelib\Folder\FolderOperator;
+use Xi\Filelib\Operator\FolderOperator;
 use Xi\Filelib\Folder\Folder;
 
 class CreateByUrlFolderCommand extends AbstractFolderCommand

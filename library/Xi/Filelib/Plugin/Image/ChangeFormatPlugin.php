@@ -12,7 +12,7 @@ namespace Xi\Filelib\Plugin\Image;
 use Xi\Filelib\Plugin\AbstractPlugin;
 use Xi\Filelib\Configurator;
 use Xi\Filelib\Event\FileUploadEvent;
-use Xi\Filelib\File\FileOperator;
+use Xi\Filelib\Operator\FileOperator;
 
 /**
  * Changes images' formats before uploading them.

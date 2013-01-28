@@ -3,7 +3,7 @@
 namespace Xi\Filelib\Tests\File\Command;
 
 use Xi\Filelib\FileLibrary;
-use Xi\Filelib\File\FileOperator;
+use Xi\Filelib\Operator\FileOperator;
 use Xi\Filelib\File\File;
 use Xi\Filelib\File\Command\AfterUploadFileCommand;
 use Xi\Filelib\File\Command\PublishFileCommand;

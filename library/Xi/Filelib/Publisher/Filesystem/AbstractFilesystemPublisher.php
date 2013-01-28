@@ -15,7 +15,7 @@ use Xi\Filelib\File\File;
 use Xi\Filelib\Linker\Linker;
 use LogicException;
 use SplFileInfo;
-use Xi\Filelib\File\FileOperator;
+use Xi\Filelib\Operator\FileOperator;
 
 /**
  * Abstract filesystem publisher convenience class

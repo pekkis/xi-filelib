@@ -3,7 +3,7 @@
 namespace Xi\Filelib\Tests\Folder\Command;
 
 use Xi\Filelib\FileLibrary;
-use Xi\Filelib\Folder\FolderOperator;
+use Xi\Filelib\Operator\FolderOperator;
 use Xi\Filelib\Folder\Folder;
 use Xi\Filelib\Folder\Command\CreateFolderCommand;
 
@@ -26,7 +26,7 @@ class CreateFolderCommandTest extends \Xi\Filelib\Tests\TestCase
     {
         $filelib = $this->getMock('Xi\Filelib\FileLibrary');
 
-        $op = $this->getMockBuilder('Xi\Filelib\Folder\FolderOperator')
+        $op = $this->getMockBuilder('Xi\Filelib\Operator\FolderOperator')
                     ->setConstructorArgs(array($filelib))
                     ->setMethods(array('createCommand'))
                     ->getMock();
@@ -61,7 +61,7 @@ class CreateFolderCommandTest extends \Xi\Filelib\Tests\TestCase
         );
         $filelib->expects($this->any())->method('getEventDispatcher')->will($this->returnValue($ed));
 
-        $op = $this->getMockBuilder('Xi\Filelib\Folder\FolderOperator')
+        $op = $this->getMockBuilder('Xi\Filelib\Operator\FolderOperator')
                    ->setMethods(array('buildRoute', 'generateUuid'))
                    ->setConstructorArgs(array($filelib))
                    ->getMock();

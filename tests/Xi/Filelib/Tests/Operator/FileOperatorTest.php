@@ -7,15 +7,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Xi\Filelib\Tests\File;
+namespace Xi\Filelib\Tests\Operator;
 
-use Xi\Filelib\FileLibrary;
-use Xi\Filelib\File\FileOperator;
+use Xi\Filelib\Operator\FileOperator;
 use Xi\Filelib\File\File;
 use Xi\Filelib\File\Resource;
 use Xi\Filelib\Folder\Folder;
 use Xi\Filelib\File\Upload\FileUpload;
-use Xi\Filelib\EnqueueableCommand;
+use Xi\Filelib\Command\EnqueueableCommand;
 use Xi\Filelib\Backend\Finder\FileFinder;
 use ArrayIterator;
 use Xi\Filelib\Configuration;
@@ -37,6 +36,7 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
     public function setUp()
     {
         $this->configuration = $this->getConfigurationWithMockedObjects();
+
         $this->op = new FileOperator($this->configuration);
         $this->backend = $this->configuration->getBackend();
     }
@@ -46,7 +46,7 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
      */
     public function classShouldExist()
     {
-        $this->assertTrue(class_exists('Xi\Filelib\File\FileOperator'));
+        $this->assertTrue(class_exists('Xi\Filelib\Operator\FileOperator'));
     }
 
     /**
@@ -169,31 +169,6 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
         $op->setCommandStrategy(FileOperator::COMMAND_UPLOAD, EnqueueableCommand::STRATEGY_ASYNCHRONOUS);
 
         $op->upload($upload, $folder, $profile);
-    }
-
-    /**
-     * @test
-     */
-    public function getInstanceShouldReturnAnInstanceOfFileWithNoData()
-    {
-        $file = $this->op->getInstance();
-        $this->assertInstanceOf('Xi\Filelib\File\File', $file);
-
-    }
-
-    /**
-     * @test
-     */
-    public function getInstanceShouldReturnAnInstanceOfFileWithData()
-    {
-        $data = array(
-            'name' => 'larva-consumes-newspaper.jpg',
-        );
-        $file = $this->op->getInstance($data);
-        $this->assertInstanceOf('Xi\Filelib\File\File', $file);
-
-        $this->assertEquals('larva-consumes-newspaper.jpg', $file->getName());
-
     }
 
     /**
@@ -683,24 +658,13 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
     }
 
     /**
-     * @test
-     */
-    public function injectFolderOperatorShouldInjectFolderOperator()
-    {
-        $fop = $this->getMockedFolderOperator();
-        $this->assertNull($this->op->getFolderOperator());
-        $this->assertSame($this->op, $this->op->injectFolderOperator($fop));
-        $this->assertSame($fop, $this->op->getFolderOperator());
-    }
-
-    /**
      * @param array $methods
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
     protected function getOpMock($methods = array())
     {
         return $this
-            ->getMockBuilder('Xi\Filelib\File\FileOperator')
+            ->getMockBuilder('Xi\Filelib\Operator\FileOperator')
             ->setConstructorArgs(array($this->configuration))
             ->setMethods($methods)
             ->getMock();

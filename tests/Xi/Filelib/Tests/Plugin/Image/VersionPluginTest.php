@@ -12,7 +12,7 @@ namespace Xi\Filelib\Tests\Plugin\Image;
 use Imagick;
 use Xi\Filelib\Plugin\Image\VersionPlugin;
 use Xi\Filelib\File\File;
-use Xi\Filelib\File\FileOperator;
+use Xi\Filelib\Operator\FileOperator;
 use Xi\Filelib\Storage\Storage;
 use Xi\Filelib\Publisher\Publisher;
 use Xi\Filelib\File\Resource;
@@ -50,7 +50,7 @@ class VersionPluginTest extends TestCase
         $this->publisher = $this->getMock('Xi\Filelib\Publisher\Publisher');
 
         $this->fileOperator = $this
-            ->getMockBuilder('Xi\Filelib\File\FileOperator')
+            ->getMockBuilder('Xi\Filelib\Operator\FileOperator')
             ->disableOriginalConstructor()
             ->getMock();
 

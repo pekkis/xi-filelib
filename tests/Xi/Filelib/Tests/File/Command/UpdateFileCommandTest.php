@@ -3,7 +3,7 @@
 namespace Xi\Filelib\Tests\File\Command;
 
 use Xi\Filelib\FileLibrary;
-use Xi\Filelib\File\FileOperator;
+use Xi\Filelib\Operator\FileOperator;
 use Xi\Filelib\File\File;
 use Xi\Filelib\File\Command\UpdateFileCommand;
 
@@ -26,7 +26,7 @@ class UpdateFileCommandTest extends \Xi\Filelib\Tests\TestCase
     {
         $filelib = $this->getMock('Xi\Filelib\FileLibrary');
 
-        $op = $this->getMockBuilder('Xi\Filelib\File\FileOperator')
+        $op = $this->getMockBuilder('Xi\Filelib\Operator\FileOperator')
                     ->setConstructorArgs(array($filelib))
                     ->setMethods(array('getAcl'))
                     ->getMock();
@@ -61,7 +61,7 @@ class UpdateFileCommandTest extends \Xi\Filelib\Tests\TestCase
             $this->isInstanceOf('Xi\Filelib\Event\FileEvent')
         );
 
-        $op = $this->getMockBuilder('Xi\Filelib\File\FileOperator')
+        $op = $this->getMockBuilder('Xi\Filelib\Operator\FileOperator')
                    ->setConstructorArgs(array($filelib))
                    ->setMethods(array('unpublish', 'publish', 'getProfile', 'getAcl', 'createCommand'))
                    ->getMock();
@@ -127,7 +127,7 @@ class UpdateFileCommandTest extends \Xi\Filelib\Tests\TestCase
     public function updateShouldDelegateCorrectlyWhenFileCanBePublished()
     {
         $filelib = $this->getMock('Xi\Filelib\FileLibrary');
-        $op = $this->getMockBuilder('Xi\Filelib\File\FileOperator')
+        $op = $this->getMockBuilder('Xi\Filelib\Operator\FileOperator')
                    ->setConstructorArgs(array($filelib))
                    ->setMethods(array('unpublish', 'publish', 'getProfile', 'getAcl', 'createCommand'))
                    ->getMock();

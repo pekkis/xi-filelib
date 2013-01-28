@@ -3,7 +3,7 @@
 namespace Xi\Filelib\Tests\File\Command;
 
 use Xi\Filelib\FileLibrary;
-use Xi\Filelib\File\FileOperator;
+use Xi\Filelib\Operator\FileOperator;
 use Xi\Filelib\File\File;
 use Xi\Filelib\File\Resource;
 use Xi\Filelib\Folder\Folder;
@@ -19,12 +19,12 @@ class CopyFileCommandTest extends \Xi\Filelib\Tests\TestCase
 
     public function setUp()
     {
-        $this->op = $this->getMockBuilder('Xi\Filelib\File\FileOperator')
+        $this->op = $this->getMockBuilder('Xi\Filelib\Operator\FileOperator')
                     ->disableOriginalConstructor()
                     ->setMethods(array('getFolderOperator', 'getAcl', 'findByFilename', 'getBackend', 'getEventDispatcher', 'getStorage', 'createCommand', 'generateUuid'))
                     ->getMock();
 
-        $this->fop = $this->getMockBuilder('Xi\Filelib\Folder\FolderOperator')
+        $this->fop = $this->getMockBuilder('Xi\Filelib\Operator\FolderOperator')
                     ->disableOriginalConstructor()
                     ->setMethods(array())
                     ->getMock();
@@ -256,7 +256,7 @@ class CopyFileCommandTest extends \Xi\Filelib\Tests\TestCase
     {
         $filelib = $this->getMock('Xi\Filelib\FileLibrary');
 
-        $op = $this->getMockBuilder('Xi\Filelib\File\FileOperator')
+        $op = $this->getMockBuilder('Xi\Filelib\Operator\FileOperator')
                     ->setConstructorArgs(array($filelib))
                     ->setMethods(array('getAcl'))
                     ->getMock();

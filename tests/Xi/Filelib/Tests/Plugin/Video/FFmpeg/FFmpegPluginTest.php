@@ -77,7 +77,7 @@ class FFmpegPluginTest extends \Xi\Filelib\Tests\TestCase
         $this->plugin = new FFmpegPlugin(
             $this->storage,
             $this->getMock('Xi\Filelib\Publisher\Publisher'),
-            $this->getMockBuilder('Xi\Filelib\File\FileOperator')
+            $this->getMockBuilder('Xi\Filelib\Operator\FileOperator')
                 ->disableOriginalConstructor()
                 ->getMock(),
             $this->tempDir,

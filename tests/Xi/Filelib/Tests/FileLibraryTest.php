@@ -45,10 +45,10 @@ class FileLibraryTest extends TestCase
      */
     public function getFileOperatorShouldReturnInjectedFileOperator()
     {
-        $this->assertInstanceOf('Xi\Filelib\File\FileOperator', $this->filelib->getFileOperator());
+        $this->assertInstanceOf('Xi\Filelib\Operator\FileOperator', $this->filelib->getFileOperator());
 
         $this->assertInstanceOf(
-            'Xi\Filelib\Folder\FolderOperator',
+            'Xi\Filelib\Operator\FolderOperator',
             $this->filelib->getFileOperator()->getFolderOperator()
         );
     }
@@ -58,10 +58,10 @@ class FileLibraryTest extends TestCase
      */
     public function getFolderOperatorShouldReturnInjectedFolderOperator()
     {
-        $this->assertInstanceOf('Xi\Filelib\Folder\FolderOperator', $this->filelib->getFolderOperator());
+        $this->assertInstanceOf('Xi\Filelib\Operator\FolderOperator', $this->filelib->getFolderOperator());
 
         $this->assertInstanceOf(
-            'Xi\Filelib\File\FileOperator',
+            'Xi\Filelib\Operator\FileOperator',
             $this->filelib->getFolderOperator()->getFileOperator()
         );
     }

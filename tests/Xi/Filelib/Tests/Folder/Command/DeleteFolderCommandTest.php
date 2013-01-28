@@ -3,8 +3,8 @@
 namespace Xi\Filelib\Tests\Folder\Command;
 
 use Xi\Filelib\FileLibrary;
-use Xi\Filelib\Folder\FolderOperator;
-use Xi\Filelib\File\FileOperator;
+use Xi\Filelib\Operator\FolderOperator;
+use Xi\Filelib\Operator\FileOperator;
 use Xi\Filelib\Folder\Folder;
 use Xi\Filelib\File\File;
 use Xi\Filelib\Folder\Command\DeleteFolderCommand;
@@ -29,12 +29,12 @@ class DeleteFolderCommandTest extends \Xi\Filelib\Tests\TestCase
     {
         $filelib = $this->getMock('Xi\Filelib\FileLibrary');
 
-        $op = $this->getMockBuilder('Xi\Filelib\Folder\FolderOperator')
+        $op = $this->getMockBuilder('Xi\Filelib\Operator\FolderOperator')
                     ->setConstructorArgs(array($filelib))
                     ->setMethods(array('createCommand'))
                     ->getMock();
 
-        $fop = $this->getMockBuilder('Xi\Filelib\File\FileOperator')
+        $fop = $this->getMockBuilder('Xi\Filelib\Operator\FileOperator')
                     ->setConstructorArgs(array($filelib))
                     ->setMethods(array())
                     ->getMock();
@@ -61,7 +61,7 @@ class DeleteFolderCommandTest extends \Xi\Filelib\Tests\TestCase
         $filelib = $this->getMock('Xi\Filelib\FileLibrary');
 
         $op = $this
-            ->getMockBuilder('Xi\Filelib\Folder\FolderOperator')
+            ->getMockBuilder('Xi\Filelib\Operator\FolderOperator')
             ->setConstructorArgs(array($filelib))
             ->setMethods(array('createCommand', 'findSubFolders', 'findFiles'))
             ->getMock();
@@ -132,7 +132,7 @@ class DeleteFolderCommandTest extends \Xi\Filelib\Tests\TestCase
                 )
             );
 
-        $fiop = $this->getMockBuilder('Xi\Filelib\File\FileOperator')
+        $fiop = $this->getMockBuilder('Xi\Filelib\Operator\FileOperator')
                       ->setMethods(array('delete'))
                       ->setConstructorArgs(array($filelib))
                       ->getMock();

@@ -3,8 +3,8 @@
 namespace Xi\Filelib\Tests\Acl;
 
 use Xi\Filelib\FileLibrary;
-use Xi\Filelib\File\FileOperator;
-use Xi\Filelib\Folder\FolderOperator;
+use Xi\Filelib\Operator\FileOperator;
+use Xi\Filelib\Operator\FolderOperator;
 use Xi\Filelib\Folder\Folder;
 use Xi\Filelib\File\File;
 use Symfony\Component\Security\Core\SecurityContextInterface;
@@ -49,8 +49,8 @@ class SymfonyAclTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $fiop = $this->getMockBuilder('Xi\Filelib\File\FileOperator')->disableOriginalConstructor()->getMock();
-        $foop = $this->getMockBuilder('Xi\Filelib\Folder\FolderOperator')->disableOriginalConstructor()->getMock();
+        $fiop = $this->getMockBuilder('Xi\Filelib\Operator\FileOperator')->disableOriginalConstructor()->getMock();
+        $foop = $this->getMockBuilder('Xi\Filelib\Operator\FolderOperator')->disableOriginalConstructor()->getMock();
         $this->fiop = $fiop;
         $this->foop = $foop;
 

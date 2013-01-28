@@ -3,7 +3,7 @@
 namespace Xi\Filelib\Tests\File\Command;
 
 use Xi\Filelib\FileLibrary;
-use Xi\Filelib\File\FileOperator;
+use Xi\Filelib\Operator\FileOperator;
 use Xi\Filelib\File\File;
 use Xi\Filelib\File\Resource;
 use Xi\Filelib\Folder\Folder;
@@ -31,7 +31,7 @@ class UploadFileCommandTest extends \Xi\Filelib\Tests\TestCase
     public function commandShouldFailIfAclForbidsUploadToFolder()
     {
         $filelib = $this->getMock('Xi\Filelib\FileLibrary');
-        $op = $this->getMockBuilder('Xi\Filelib\File\FileOperator')
+        $op = $this->getMockBuilder('Xi\Filelib\Operator\FileOperator')
                    ->setConstructorArgs(array($filelib))
                    ->setMethods(array('getAcl'))
                    ->getMock();
@@ -69,7 +69,7 @@ class UploadFileCommandTest extends \Xi\Filelib\Tests\TestCase
 
         $filelib->expects($this->any())->method('getEventDispatcher')->will($this->returnValue($dispatcher));
 
-        $op = $this->getMockBuilder('Xi\Filelib\File\FileOperator')
+        $op = $this->getMockBuilder('Xi\Filelib\Operator\FileOperator')
                    ->setConstructorArgs(array($filelib))
                    ->setMethods(array('getAcl', 'getProfile', 'getBackend', 'getStorage', 'publish', 'getInstance', 'generateUuid', 'createCommand', 'executeOrQueue'))
                    ->getMock();
@@ -161,7 +161,7 @@ class UploadFileCommandTest extends \Xi\Filelib\Tests\TestCase
     {
         $filelib = $this->getMock('Xi\Filelib\FileLibrary');
 
-        $op = $this->getMockBuilder('Xi\Filelib\File\FileOperator')
+        $op = $this->getMockBuilder('Xi\Filelib\Operator\FileOperator')
                     ->setConstructorArgs(array($filelib))
                     ->setMethods(array('getAcl'))
                     ->getMock();
@@ -194,7 +194,7 @@ class UploadFileCommandTest extends \Xi\Filelib\Tests\TestCase
 
         $filelib = $this->getMock('Xi\Filelib\FileLibrary');
 
-        $op = $this->getMockBuilder('Xi\Filelib\File\FileOperator')
+        $op = $this->getMockBuilder('Xi\Filelib\Operator\FileOperator')
                     ->setConstructorArgs(array($filelib))
                     ->setMethods(array('getBackend', 'getProfile'))
                     ->getMock();
@@ -249,7 +249,7 @@ class UploadFileCommandTest extends \Xi\Filelib\Tests\TestCase
 
         $filelib = $this->getMock('Xi\Filelib\FileLibrary');
 
-        $op = $this->getMockBuilder('Xi\Filelib\File\FileOperator')
+        $op = $this->getMockBuilder('Xi\Filelib\Operator\FileOperator')
             ->setConstructorArgs(array($filelib))
             ->setMethods(array('getBackend', 'getProfile'))
             ->getMock();
@@ -306,7 +306,7 @@ class UploadFileCommandTest extends \Xi\Filelib\Tests\TestCase
         $file = File::create(array());
         $filelib = $this->getMock('Xi\Filelib\FileLibrary');
 
-        $op = $this->getMockBuilder('Xi\Filelib\File\FileOperator')
+        $op = $this->getMockBuilder('Xi\Filelib\Operator\FileOperator')
                     ->setConstructorArgs(array($filelib))
                     ->setMethods(array('getBackend', 'getProfile'))
                     ->getMock();

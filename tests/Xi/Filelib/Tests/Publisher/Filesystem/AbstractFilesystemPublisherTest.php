@@ -68,7 +68,7 @@ class AbstractFilesystemPublisherTest extends TestCase
      */
     public function getLinkerForFileShouldDelegateToOperator()
     {
-        $fileop = $this->getMockBuilder('Xi\Filelib\File\FileOperator')->disableOriginalConstructor()->getMock();
+        $fileop = $this->getMockBuilder('Xi\Filelib\Operator\FileOperator')->disableOriginalConstructor()->getMock();
         $profile = $this->getMockedFileProfile();
 
         $publisher = $this
