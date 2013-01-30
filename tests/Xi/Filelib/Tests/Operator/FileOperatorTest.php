@@ -55,37 +55,37 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
     public function strategiesShouldDefaultToSynchronous()
     {
         $this->assertEquals(
-            EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+            CommandFactory::STRATEGY_SYNCHRONOUS,
             $this->op->getCommandStrategy(FileOperator::COMMAND_UPLOAD)
         );
 
         $this->assertEquals(
-            EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+            CommandFactory::STRATEGY_SYNCHRONOUS,
             $this->op->getCommandStrategy(FileOperator::COMMAND_AFTERUPLOAD)
         );
 
         $this->assertEquals(
-            EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+            CommandFactory::STRATEGY_SYNCHRONOUS,
             $this->op->getCommandStrategy(FileOperator::COMMAND_UPDATE)
         );
 
         $this->assertEquals(
-            EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+            CommandFactory::STRATEGY_SYNCHRONOUS,
             $this->op->getCommandStrategy(FileOperator::COMMAND_DELETE)
         );
 
         $this->assertEquals(
-            EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+            CommandFactory::STRATEGY_SYNCHRONOUS,
             $this->op->getCommandStrategy(FileOperator::COMMAND_PUBLISH)
         );
 
         $this->assertEquals(
-            EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+            CommandFactory::STRATEGY_SYNCHRONOUS,
             $this->op->getCommandStrategy(FileOperator::COMMAND_UNPUBLISH)
         );
 
         $this->assertEquals(
-            EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+            CommandFactory::STRATEGY_SYNCHRONOUS,
             $this->op->getCommandStrategy(FileOperator::COMMAND_COPY)
         );
     }
@@ -96,17 +96,17 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
     public function settingAndGettingCommandStrategiesShouldWork()
     {
         $this->assertEquals(
-            EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+            CommandFactory::STRATEGY_SYNCHRONOUS,
             $this->op->getCommandStrategy(FileOperator::COMMAND_UPLOAD)
         );
 
         $this->assertSame(
             $this->op,
-            $this->op->setCommandStrategy(FileOperator::COMMAND_UPLOAD, EnqueueableCommand::STRATEGY_ASYNCHRONOUS)
+            $this->op->setCommandStrategy(FileOperator::COMMAND_UPLOAD, CommandFactory::STRATEGY_ASYNCHRONOUS)
         );
 
         $this->assertEquals(
-            EnqueueableCommand::STRATEGY_ASYNCHRONOUS,
+            CommandFactory::STRATEGY_ASYNCHRONOUS,
             $this->op->getCommandStrategy(FileOperator::COMMAND_UPLOAD)
         );
     }
@@ -166,7 +166,7 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
             ->with($this->equalTo('Xi\Filelib\File\Command\UploadFileCommand'))
             ->will($this->returnValue($uploadCommand));
 
-        $op->setCommandStrategy(FileOperator::COMMAND_UPLOAD, EnqueueableCommand::STRATEGY_ASYNCHRONOUS);
+        $op->setCommandStrategy(FileOperator::COMMAND_UPLOAD, CommandFactory::STRATEGY_ASYNCHRONOUS);
 
         $op->upload($upload, $folder, $profile);
     }
@@ -517,7 +517,7 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
                 'Xi\Filelib\File\Command\CopyFileCommand',
                 'copy',
                 FileOperator::COMMAND_COPY,
-                EnqueueableCommand::STRATEGY_ASYNCHRONOUS,
+                CommandFactory::STRATEGY_ASYNCHRONOUS,
                 true,
                 true
             ),
@@ -525,7 +525,7 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
                 'Xi\Filelib\File\Command\CopyFileCommand',
                 'copy',
                 FileOperator::COMMAND_COPY,
-                EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+                CommandFactory::STRATEGY_SYNCHRONOUS,
                 false,
                 true
             ),
@@ -533,7 +533,7 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
                 'Xi\Filelib\File\Command\DeleteFileCommand',
                 'delete',
                 FileOperator::COMMAND_DELETE,
-                EnqueueableCommand::STRATEGY_ASYNCHRONOUS,
+                CommandFactory::STRATEGY_ASYNCHRONOUS,
                 true,
                 false
             ),
@@ -541,7 +541,7 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
                 'Xi\Filelib\File\Command\DeleteFileCommand',
                 'delete',
                 FileOperator::COMMAND_DELETE,
-                EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+                CommandFactory::STRATEGY_SYNCHRONOUS,
                 false,
                 false
             ),
@@ -549,7 +549,7 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
                 'Xi\Filelib\File\Command\PublishFileCommand',
                 'publish',
                 FileOperator::COMMAND_PUBLISH,
-                EnqueueableCommand::STRATEGY_ASYNCHRONOUS,
+                CommandFactory::STRATEGY_ASYNCHRONOUS,
                 true,
                 false
             ),
@@ -557,7 +557,7 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
                 'Xi\Filelib\File\Command\PublishFileCommand',
                 'publish',
                 FileOperator::COMMAND_PUBLISH,
-                EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+                CommandFactory::STRATEGY_SYNCHRONOUS,
                 false,
                 false
             ),
@@ -565,7 +565,7 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
                 'Xi\Filelib\File\Command\UnpublishFileCommand',
                 'unpublish',
                 FileOperator::COMMAND_UNPUBLISH,
-                EnqueueableCommand::STRATEGY_ASYNCHRONOUS,
+                CommandFactory::STRATEGY_ASYNCHRONOUS,
                 true,
                 false
             ),
@@ -573,7 +573,7 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
                 'Xi\Filelib\File\Command\UnpublishFileCommand',
                 'unpublish',
                 FileOperator::COMMAND_UNPUBLISH,
-                EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+                CommandFactory::STRATEGY_SYNCHRONOUS,
                 false,
                 false
             ),
@@ -581,7 +581,7 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
                 'Xi\Filelib\File\Command\UpdateFileCommand',
                 'update',
                 FileOperator::COMMAND_UPDATE,
-                EnqueueableCommand::STRATEGY_ASYNCHRONOUS,
+                CommandFactory::STRATEGY_ASYNCHRONOUS,
                 true,
                 false
             ),
@@ -589,7 +589,7 @@ class FileOperatorTest extends \Xi\Filelib\Tests\TestCase
                 'Xi\Filelib\File\Command\UpdateFileCommand',
                 'update',
                 FileOperator::COMMAND_UPDATE,
-                EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+                CommandFactory::STRATEGY_SYNCHRONOUS,
                 false,
                 false
             ),

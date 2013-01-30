@@ -87,41 +87,65 @@ class TestCase extends \PHPUnit_Framework_TestCase
         return $folderop;
     }
 
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
     public function getMockedStorage()
     {
         return $this->getMock('Xi\Filelib\Storage\Storage');
     }
 
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
     public function getMockedLinker()
     {
         return $this->getMock('Xi\Filelib\Linker\Linker');
     }
 
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
     public function getMockedAcl()
     {
         return $this->getMock('Xi\Filelib\Acl\Acl');
     }
 
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
     public function getMockedQueue()
     {
         return $this->getMock('Xi\Filelib\Queue\Queue');
     }
 
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
     public function getMockedEventDispatcher()
     {
         return $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
     }
 
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
     public function getMockedPublisher()
     {
         return $this->getMock('Xi\Filelib\Publisher\Publisher');
     }
 
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
     public function getMockedPlatform()
     {
         return $this->getMock('Xi\Filelib\Backend\Platform\Platform');
     }
 
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
     public function getMockedBackend()
     {
         $backend = $this
@@ -132,6 +156,9 @@ class TestCase extends \PHPUnit_Framework_TestCase
         return $backend;
     }
 
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
     public function getMockedFileProfile($name = null)
     {
         $profile = $this
@@ -149,10 +176,37 @@ class TestCase extends \PHPUnit_Framework_TestCase
         return $profile;
     }
 
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
     public function getMockedPlugin()
     {
         $plugin = $this->getMock('Xi\Filelib\Plugin\Plugin');
         return $plugin;
+    }
+
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    public function getMockedCommand()
+    {
+        return $this->getMock('Xi\Filelib\Command\Command');
+    }
+
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    public function getMockedFolder()
+    {
+        return $this->getMock('Xi\Filelib\Folder\Folder');
+    }
+
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    public function getMockedFile()
+    {
+        return $this->getMock('Xi\Filelib\File\File');
     }
 
     /**

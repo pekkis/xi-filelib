@@ -69,7 +69,6 @@ class AfterUploadFileCommand extends AbstractFileCommand
             'file' => $this->file,
             'uuid' => $this->uuid,
         ));
-
     }
 
 }

@@ -11,9 +11,10 @@ namespace Xi\Filelib\Operator;
 
 use Xi\Filelib\FilelibException;
 use Xi\Filelib\Folder\Folder;
-use Xi\Filelib\Command\EnqueueableCommand;
 use Xi\Filelib\Backend\Finder\FolderFinder;
 use Xi\Filelib\Backend\Finder\FileFinder;
+use Xi\Filelib\Command\CommandDefinition;
+use Xi\Filelib\Command\CommandFactory;
 use ArrayIterator;
 
 /**
@@ -29,12 +30,34 @@ class FolderOperator extends AbstractOperator
     const COMMAND_UPDATE = 'update';
     const COMMAND_CREATE_BY_URL = 'create_by_url';
 
-    protected $commandStrategies = array(
-        self::COMMAND_CREATE => EnqueueableCommand::STRATEGY_SYNCHRONOUS,
-        self::COMMAND_DELETE => EnqueueableCommand::STRATEGY_SYNCHRONOUS,
-        self::COMMAND_UPDATE => EnqueueableCommand::STRATEGY_SYNCHRONOUS,
-        self::COMMAND_CREATE_BY_URL => EnqueueableCommand::STRATEGY_SYNCHRONOUS,
-    );
+    /**
+     * @return array
+     */
+    public function getCommandDefinitions()
+    {
+        return array(
+            new CommandDefinition(
+                self::COMMAND_CREATE,
+                'Xi\Filelib\Folder\Command\CreateFolderCommand',
+                CommandFactory::STRATEGY_SYNCHRONOUS
+            ),
+            new CommandDefinition(
+                self::COMMAND_DELETE,
+                'Xi\Filelib\Folder\Command\CreateFolderCommand',
+                CommandFactory::STRATEGY_SYNCHRONOUS
+            ),
+            new CommandDefinition(
+                self::COMMAND_UPDATE,
+                'Xi\Filelib\Folder\Command\CreateFolderCommand',
+                CommandFactory::STRATEGY_SYNCHRONOUS
+            ),
+            new CommandDefinition(
+                self::COMMAND_CREATE_BY_URL,
+                'Xi\Filelib\Folder\Command\CreateByUrlFolderCommand',
+                CommandFactory::STRATEGY_SYNCHRONOUS
+            )
+        );
+    }
 
     /**
      * Returns directory route for folder
@@ -62,28 +85,28 @@ class FolderOperator extends AbstractOperator
      * Creates a folder
      *
      * @param Folder $folder
+     * @return mixed
      */
     public function create(Folder $folder)
     {
-        $command = $this->getCommandFactory()->createCommand('Xi\Filelib\Folder\Command\CreateFolderCommand', array(
-            $this, $folder
-        ));
-        return $this->getCommandFactory()->executeOrQueue($command, self::COMMAND_CREATE);
+        return $this
+            ->getCommandFactory()
+            ->createCommand(self::COMMAND_CREATE, array($this->operatorManager))
+            ->execute();
     }
 
     /**
      * Deletes a folder
      *
      * @param Folder $folder Folder
+     * @return mixed
      */
     public function delete(Folder $folder)
     {
-        $command = $this->getCommandFactory()->createCommand('Xi\Filelib\Folder\Command\DeleteFolderCommand', array(
-            $this->operatorManager, $folder
-        ));
-
-        return $this->getCommandFactory()->executeOrQueue($command, self::COMMAND_DELETE);
-
+        return $this
+            ->getCommandFactory()
+            ->createCommand(self::COMMAND_DELETE, array($this->operatorManager))
+            ->execute();
     }
 
     /**
@@ -93,10 +116,24 @@ class FolderOperator extends AbstractOperator
      */
     public function update(Folder $folder)
     {
-        $command = $this->getCommandFactory()->createCommand('Xi\Filelib\Folder\Command\UpdateFolderCommand', array(
-            $this->operatorManager, $folder
-        ));
-        return $this->getCommandFactory()->executeOrQueue($command, self::COMMAND_UPDATE);
+        return $this
+            ->getCommandFactory()
+            ->createCommand(self::COMMAND_UPDATE, array($this->operatorManager))
+            ->execute();
+    }
+
+    /**
+     * Finds folder by url
+     *
+     * @param string $url
+     * @return mixed
+     */
+    public function createByUrl($url)
+    {
+        return $this
+            ->getCommandFactory()
+            ->createCommand(self::COMMAND_CREATE_BY_URL, array($this->operatorManager))
+            ->execute();
     }
 
     /**
@@ -137,14 +174,6 @@ class FolderOperator extends AbstractOperator
         )->current();
 
         return $folder;
-    }
-
-    public function createByUrl($url)
-    {
-        $command = $this->getCommandFactory()->createCommand('Xi\Filelib\Folder\Command\CreateByUrlFolderCommand', array(
-            $this->operatorManager, $url
-        ));
-        return $this->getCommandFactory()->executeOrQueue($command, self::COMMAND_CREATE_BY_URL);
     }
 
     /**

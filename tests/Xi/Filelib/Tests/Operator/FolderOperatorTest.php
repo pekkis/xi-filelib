@@ -6,11 +6,12 @@ use Xi\Filelib\FileLibrary;
 use Xi\Filelib\Operator\FolderOperator;
 use Xi\Filelib\Folder\Folder;
 use Xi\Filelib\File\File;
-use Xi\Filelib\Command\EnqueueableCommand;
 use Xi\Filelib\Backend\Finder\FolderFinder;
 use Xi\Filelib\Backend\Finder\FileFinder;
 use ArrayIterator;
 use Xi\Filelib\Configuration;
+use Xi\Filelib\Command\CommandDefinition;
+use Xi\Filelib\Command\CommandFactory;
 
 class FolderOperatorTest extends \Xi\Filelib\Tests\TestCase
 {
@@ -69,74 +70,80 @@ class FolderOperatorTest extends \Xi\Filelib\Tests\TestCase
     {
         $this->assertEquals(
             array(
-                FolderOperator::COMMAND_CREATE => array(
+                new CommandDefinition(
+                    FolderOperator::COMMAND_CREATE,
                     'Xi\Filelib\Folder\Command\CreateFolderCommand',
-                    EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+                    CommandFactory::STRATEGY_SYNCHRONOUS
                 ),
-                FolderOperator::COMMAND_DELETE => array(
-                    'Xi\Filelib\Folder\Command\DeleteFolderCommand',
-                    EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+                new CommandDefinition(
+                    FolderOperator::COMMAND_DELETE,
+                    'Xi\Filelib\Folder\Command\CreateFolderCommand',
+                    CommandFactory::STRATEGY_SYNCHRONOUS
                 ),
-                FolderOperator::COMMAND_UPDATE => array(
-                    'Xi\Filelib\Folder\Command\UpdateFolderCommand',
-                    EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+                new CommandDefinition(
+                    FolderOperator::COMMAND_UPDATE,
+                    'Xi\Filelib\Folder\Command\CreateFolderCommand',
+                    CommandFactory::STRATEGY_SYNCHRONOUS
                 ),
-                FolderOperator::COMMAND_CREATE_BY_URL => array(
+                new CommandDefinition(
+                    FolderOperator::COMMAND_CREATE_BY_URL,
                     'Xi\Filelib\Folder\Command\CreateByUrlFolderCommand',
-                    EnqueueableCommand::STRATEGY_SYNCHRONOUS,
-                ),
+                    CommandFactory::STRATEGY_SYNCHRONOUS
+                )
             ),
-            $this->op->getCommands()
+            $this->op->getCommandDefinitions()
+        );
+    }
+
+    /**
+     * @return array
+     */
+    public function provideCommandMethodData()
+    {
+        return array(
+            array(FolderOperator::COMMAND_CREATE, 'create'),
+            array(FolderOperator::COMMAND_DELETE, 'delete'),
+            array(FolderOperator::COMMAND_UPDATE, 'update'),
+            array(FolderOperator::COMMAND_CREATE_BY_URL, 'createByUrl'),
         );
     }
 
     /**
      * @test
-     * @dataProvider provideCommandMethods
+     * @dataProvider provideCommandMethodData
+     * @group lusse
      */
-    public function commandMethodsShouldExecuteOrEnqeueDependingOnStrategy($commandClass, $operatorMethod, $commandName, $strategy, $queueExpected)
+    public function commandMethodsShouldDelegeteToCommandFactory($commandName, $methodName)
     {
-        $op = $this->getOpMock(array('createCommand'));
+        $self = $this;
 
-        $queue = $this->configuration->getQueue();
-
-        $command = $this
-            ->getMockBuilder($commandClass)
+        $executable = $this
+            ->getMockBuilder('Xi\Filelib\Command\Executable')
             ->disableOriginalConstructor()
-            ->setMethods(array('execute'))
             ->getMock();
 
-        if ($queueExpected) {
+        $executable
+            ->expects($this->once())
+            ->method('execute')
+            ->will($this->returnValue('tussenhofer'));
 
-            $queue
-                ->expects($this->once())
-                ->method('enqueue')
-                ->with($this->isInstanceOf($commandClass));
-
-            $command->expects($this->never())->method('execute');
-
-        } else {
-
-            $queue
-                ->expects($this->never())
-                ->method('enqueue');
-
-            $command
-                ->expects($this->once())
-                ->method('execute');
-
-        }
-
-        $folder = $this->getMock('Xi\Filelib\Folder\Folder');
-
-        $op
+        $this->commandFactory
             ->expects($this->once())
             ->method('createCommand')
-            ->with($this->equalTo($commandClass))
-            ->will($this->returnValue($command));
+            ->with($commandName)
+            ->will(
+                $this->returnCallback(
+                    function ($commandName, $args) use ($self, $executable) {
+                        $self->assertInstanceOf('Xi\Filelib\Operator\OperatorManager', $args[0]);
+                        return $executable;
+                    }
+                )
+            );
 
-        $op->setCommandStrategy($commandName, $strategy);
-        $op->$operatorMethod($folder);
+        $folder = $this->getMockedFolder();
+        $ret = call_user_func_array(array($this->op, $methodName), array($folder));
+
+        $this->assertSame('tussenhofer', $ret);
     }
 
     /**

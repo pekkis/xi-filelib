@@ -45,13 +45,13 @@ class FileOperator extends AbstractOperator
      * @var array
      */
     protected $commandStrategies = array(
-        self::COMMAND_UPLOAD => EnqueueableCommand::STRATEGY_SYNCHRONOUS,
-        self::COMMAND_AFTERUPLOAD => EnqueueableCommand::STRATEGY_SYNCHRONOUS,
-        self::COMMAND_UPDATE => EnqueueableCommand::STRATEGY_SYNCHRONOUS,
-        self::COMMAND_DELETE => EnqueueableCommand::STRATEGY_SYNCHRONOUS,
-        self::COMMAND_PUBLISH => EnqueueableCommand::STRATEGY_SYNCHRONOUS,
-        self::COMMAND_UNPUBLISH => EnqueueableCommand::STRATEGY_SYNCHRONOUS,
-        self::COMMAND_COPY => EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+        self::COMMAND_UPLOAD => CommandFactory::STRATEGY_SYNCHRONOUS,
+        self::COMMAND_AFTERUPLOAD => CommandFactory::STRATEGY_SYNCHRONOUS,
+        self::COMMAND_UPDATE => CommandFactory::STRATEGY_SYNCHRONOUS,
+        self::COMMAND_DELETE => CommandFactory::STRATEGY_SYNCHRONOUS,
+        self::COMMAND_PUBLISH => CommandFactory::STRATEGY_SYNCHRONOUS,
+        self::COMMAND_UNPUBLISH => CommandFactory::STRATEGY_SYNCHRONOUS,
+        self::COMMAND_COPY => CommandFactory::STRATEGY_SYNCHRONOUS,
     );
 
     /**

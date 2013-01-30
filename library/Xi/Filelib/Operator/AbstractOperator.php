@@ -20,6 +20,7 @@ use Xi\Filelib\Tool\UuidGenerator\PHPUuidGenerator;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Xi\Filelib\Command\CommandFactory;
 use Xi\Filelib\Command\Commander;
+use Xi\Filelib\Command\CommandDefinition;
 
 /**
  * Abstract convenience class for operators
@@ -67,9 +68,12 @@ abstract class AbstractOperator implements Commander
     /**
      * @var array
      */
-    protected $commandStrategies = array();
+    protected $commandDefinitions = array();
 
-    private $commandFactory;
+    /**
+     * @var CommandFactory
+     */
+    protected $commandFactory;
 
     public function __construct(Configuration $configuration, OperatorManager $operatorManager)
     {
@@ -80,14 +84,6 @@ abstract class AbstractOperator implements Commander
         $this->acl = $configuration->getAcl();
         $this->eventDispatcher = $configuration->getEventDispatcher();
         $this->commandFactory = new CommandFactory($configuration->getQueue(), $this);
-    }
-
-    /**
-     * @return array
-     */
-    public function getCommands()
-    {
-        return $this->commandStrategies;
     }
 
     /**
