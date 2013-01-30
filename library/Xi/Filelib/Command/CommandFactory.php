@@ -11,9 +11,13 @@ namespace Xi\Filelib\Command;
 
 use Xi\Filelib\Queue\Queue;
 use Xi\Filelib\Tool\UuidGenerator\PHPUuidGenerator;
+use Xi\Filelib\Exception\InvalidArgumentException;
 
 class CommandFactory
 {
+    const STRATEGY_SYNCHRONOUS = 'sync';
+    const STRATEGY_ASYNCHRONOUS = 'async';
+
     /**
      * @var Queue
      */
@@ -27,13 +31,7 @@ class CommandFactory
     /**
      * @var array
      */
-    private $commands = array();
-
-    /**
-     *
-     * @var PhpUuidGenerator
-     */
-    protected $uuidGenerator;
+    private $commandDefinitions = array();
 
     /**
      * @param Queue $queue
@@ -43,7 +41,9 @@ class CommandFactory
     {
         $this->queue = $queue;
         $this->commander = $commander;
-        $this->commands = $commander->getCommands();
+        foreach ($commander->getCommandDefinitions() as $cd) {
+            $this->addCommandDefinition($cd);
+        }
     }
 
     /**
@@ -52,9 +52,7 @@ class CommandFactory
      */
     public function getCommandStrategy($command)
     {
-        $this->assertCommandExists($command);
-
-        return $this->commands[$command][1];
+        return $this->getCommandDefinition($command)->getStrategy();
     }
 
     /**
@@ -64,10 +62,7 @@ class CommandFactory
      */
     public function setCommandStrategy($command, $strategy)
     {
-        $this->assertCommandExists($command);
-        $this->assertStrategyExists($strategy);
-        $this->commands[$command][1] = $strategy;
-
+        $this->getCommandDefinition($command)->setStrategy($strategy);
         return $this;
     }
 
@@ -76,77 +71,52 @@ class CommandFactory
      * @param array $args
      * @return Command
      */
-    public function createCommand($commandClass, array $args = array())
+    public function createCommand($command, array $args = array())
     {
-        $reflClass = new \ReflectionClass($commandClass);
-        return $reflClass->newInstanceArgs($args);
+        $commandDefinition = $this->getCommandDefinition($command);
+        $reflClass = new \ReflectionClass($commandDefinition->getClass());
+        $command = $reflClass->newInstanceArgs($args);
+        return new Executable($command, $this->createExecutionStrategy($commandDefinition->getStrategy()));
+    }
+
+    private function createExecutionStrategy($strategy)
+    {
+        switch ($strategy) {
+            case self::STRATEGY_SYNCHRONOUS:
+                $strategy = new SynchronousExecutionStrategy();
+                break;
+            case self::STRATEGY_ASYNCHRONOUS:
+                $strategy = new AsynchronousExecutionStrategy($this->queue);
+                break;
+        }
+
+        return $strategy;
     }
 
     /**
-     * @param EnqueueableCommand $commandObj
-     * @param string $commandName
-     * @param array $callbacks
-     * @return mixed
+     * @param CommandDefinition $commandDefinition
+     * @return CommandFactory
      */
-    public function executeOrQueue(EnqueueableCommand $commandObj, $commandName, array $callbacks = array())
+    private function addCommandDefinition(CommandDefinition $commandDefinition)
     {
-        $strategy = $this->getCommandStrategy($commandName);
-
-        if ($strategy == EnqueueableCommand::STRATEGY_ASYNCHRONOUS) {
-            $ret = $this->queue->enqueue($commandObj);
-        } else {
-            $ret = $commandObj->execute();
-        }
-
-        return $this->executeOrQueueHandleCallbacks($strategy, $callbacks, $ret);
+        $this->commandDefinitions[$commandDefinition->getName()] = $commandDefinition;
+        return $this;
     }
 
     /**
-     * Generates UUID
-     *
-     * @return string
+     * @param string $name
+     * @return CommandDefinition
+     * @throws InvalidArgumentException
      */
-    public function generateUuid()
+    private function getCommandDefinition($command)
     {
-        return $this->getUuidGenerator()->v4();
-    }
 
-    /**
-     * @return PhpUuidGenerator
-     */
-    protected function getUuidGenerator()
-    {
-        if (!$this->uuidGenerator) {
-            $this->uuidGenerator = new PHPUuidGenerator();
+        if (!isset($this->commandDefinitions[$command])) {
+            throw new InvalidArgumentException(
+                sprintf("Command definition '%s' not found", $command)
+            );
         }
 
-        return $this->uuidGenerator;
-    }
-
-
-    private function executeOrQueueHandleCallbacks($strategy, $callbacks, $ret)
-    {
-        if (isset($callbacks[$strategy])) {
-            return $callbacks[$strategy]($this->commander, $ret);
-        }
-
-        return $ret;
-    }
-
-    private function assertCommandExists($command)
-    {
-        if (!isset($this->commands[$command])) {
-            throw new \InvalidArgumentException("Command '{$command}' is not supported");
-        }
-    }
-
-    private function assertStrategyExists($strategy)
-    {
-        if (!in_array(
-            $strategy,
-            array(EnqueueableCommand::STRATEGY_ASYNCHRONOUS, EnqueueableCommand::STRATEGY_SYNCHRONOUS)
-        )) {
-            throw new \InvalidArgumentException("Invalid command strategy '{$strategy}'");
-        }
+        return $this->commandDefinitions[$command];
     }
 }

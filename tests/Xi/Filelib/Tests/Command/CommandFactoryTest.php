@@ -6,6 +6,7 @@ use Xi\Filelib\Command\EnqueueableCommand;
 use Xi\Filelib\Command\CommandFactory;
 use Xi\Filelib\Command\Commander;
 use InvalidArgumentException;
+use Xi\Filelib\Command\CommandDefinition;
 
 class CommandFactoryTest extends \Xi\Filelib\Tests\TestCase
 {
@@ -21,23 +22,30 @@ class CommandFactoryTest extends \Xi\Filelib\Tests\TestCase
      */
     private $queue;
 
+    /**
+     * @var CommandDefinition
+     */
+    private $tussi;
+
+    /**
+     * @var CommandDefinition
+     */
+    private $lussi;
+
     public function setUp()
     {
+        $this->tussi = new CommandDefinition('tussi', 'ManateeTussi', CommandFactory::STRATEGY_ASYNCHRONOUS);
+        $this->lussi = new CommandDefinition('lussi', 'ManateeLussi', CommandFactory::STRATEGY_SYNCHRONOUS);
+
         $this->commander = $this->getMock('Xi\Filelib\Command\Commander');
         $this->commander
             ->expects($this->any())
-            ->method('getCommands')
+            ->method('getCommandDefinitions')
             ->will(
                 $this->returnValue(
                     array(
-                        'tussi' => array(
-                            'Manatee\Tussi',
-                            EnqueueableCommand::STRATEGY_ASYNCHRONOUS,
-                         ),
-                        'lussi' => array(
-                            'Manatee\Lussi',
-                            EnqueueableCommand::STRATEGY_SYNCHRONOUS
-                        ),
+                        $this->tussi,
+                        $this->lussi
                     )
                 )
             );
@@ -59,18 +67,12 @@ class CommandFactoryTest extends \Xi\Filelib\Tests\TestCase
      */
     public function shouldInitializeProperly()
     {
-        $this->assertAttributeEquals(
+        $this->assertAttributeSame(
             array(
-                'tussi' => array(
-                    'Manatee\Tussi',
-                    EnqueueableCommand::STRATEGY_ASYNCHRONOUS,
-                ),
-                'lussi' => array(
-                    'Manatee\Lussi',
-                    EnqueueableCommand::STRATEGY_SYNCHRONOUS
-                ),
+                'tussi' => $this->tussi,
+                'lussi' => $this->lussi,
             ),
-            'commands',
+            'commandDefinitions',
             $this->commandFactory
         );
     }
@@ -90,16 +92,7 @@ class CommandFactoryTest extends \Xi\Filelib\Tests\TestCase
      */
     public function settingInvalidCommandShouldThrowException()
     {
-        $this->commandFactory->setCommandStrategy('lussenhof', EnqueueableCommand::STRATEGY_ASYNCHRONOUS);
-    }
-
-    /**
-     * @test
-     * @expectedException InvalidArgumentException
-     */
-    public function settingInvalidStrategyShouldThrowException()
-    {
-        $this->commandFactory->setCommandStrategy('tussi', 'aaaaaaaaargh olen täynnä ilmaa!');
+        $this->commandFactory->setCommandStrategy('lussenhof', CommandFactory::STRATEGY_ASYNCHRONOUS);
     }
 
     /**
@@ -108,114 +101,19 @@ class CommandFactoryTest extends \Xi\Filelib\Tests\TestCase
     public function settingStrategyShouldWork()
     {
         $this->assertEquals(
-            EnqueueableCommand::STRATEGY_ASYNCHRONOUS,
+            CommandFactory::STRATEGY_ASYNCHRONOUS,
             $this->commandFactory->getCommandStrategy('tussi')
         );
 
         $this->assertSame(
             $this->commandFactory,
-            $this->commandFactory->setCommandStrategy('tussi', EnqueueableCommand::STRATEGY_SYNCHRONOUS)
+            $this->commandFactory->setCommandStrategy('tussi', CommandFactory::STRATEGY_SYNCHRONOUS)
         );
 
         $this->assertEquals(
-            EnqueueableCommand::STRATEGY_SYNCHRONOUS,
+            CommandFactory::STRATEGY_SYNCHRONOUS,
             $this->commandFactory->getCommandStrategy('tussi')
         );
-    }
-
-
-    /**
-     * @test
-     */
-    public function executeOrQueueShouldEnqueueWithAsynchronousStrategy()
-    {
-        $command = $this->getMock('Xi\Filelib\Command\EnqueueableCommand');
-
-        $this->queue
-            ->expects($this->once())
-            ->method('enqueue')
-            ->with($command)
-            ->will($this->returnValue('tussi-id'));
-
-        $ret = $this->commandFactory->executeOrQueue($command, 'tussi', array());
-        $this->assertEquals('tussi-id', $ret);
-    }
-
-    /**
-     * @test
-     */
-    public function executeOrQueueShouldExecuteWithSynchronousStrategy()
-    {
-        $command = $this->getMock('Xi\Filelib\Command\EnqueueableCommand');
-        $command
-            ->expects($this->once())
-            ->method('execute')
-            ->will($this->returnValue('executed!!!'));
-
-
-        $this->queue
-            ->expects($this->never())
-            ->method('enqueue');
-
-        $ret = $this->commandFactory->executeOrQueue($command, 'lussi', array());
-        $this->assertEquals('executed!!!', $ret);
-    }
-
-    /**
-     * @return array
-     */
-    public function provideCallbackStrategies()
-    {
-        return array(
-            array('asynchronous', 'tussi'),
-            array('synchronous', 'lussi'),
-        );
-    }
-
-    /**
-     * @test
-     * @dataProvider provideCallbackStrategies
-     */
-    public function executeOrQueueShouldUtilizeCallbacks($expectedValue, $commandType)
-    {
-        $self = $this;
-
-        $callbacks = array(
-            EnqueueableCommand::STRATEGY_ASYNCHRONOUS => function (Commander $co, $ret) use ($self) {
-                $this->assertEquals('queuedValue', $ret);
-                $this->assertSame($self->commander, $co);
-                return 'asynchronous';
-            },
-            EnqueueableCommand::STRATEGY_SYNCHRONOUS => function (Commander $co, $ret) use ($self) {
-                $this->assertEquals('originalValue', $ret);
-                $this->assertSame($self->commander, $co);
-                return 'synchronous';
-            }
-        );
-
-        $command = $this->getMock('Xi\Filelib\Command\EnqueueableCommand');
-        $command
-            ->expects($this->any())
-            ->method('execute')
-            ->will($this->returnValue('originalValue'));
-
-        $this->queue
-            ->expects($this->any())
-            ->method('enqueue')
-            ->will($this->returnValue('queuedValue'));
-
-        $ret = $this->commandFactory->executeOrQueue($command, $commandType, $callbacks);
-        $this->assertEquals($expectedValue, $ret);
-
-    }
-
-    /**
-     * @test
-     */
-    public function generateUuidShouldGenerateUuid()
-    {
-        $uuid = $this->commandFactory->generateUuid();
-        $this->assertRegExp("/^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}$/", $uuid);
     }
 
     /**
@@ -223,12 +121,46 @@ class CommandFactoryTest extends \Xi\Filelib\Tests\TestCase
      */
     public function createCommandCreatesCommandObject()
     {
-        $mockClass = $this->getMockClass('Xi\Filelib\Command\Command');
+        if (!class_exists('ManateeLussi')) {
+            $mockClass = $this->getMockClass(
+                'Xi\Filelib\Command\Command',
+                array(),
+                array(),
+                'ManateeLussi'
+            );
+        }
 
-        $command = $this->commandFactory->createCommand(
-            $mockClass
+        if (!class_exists('ManateeTussi')) {
+            $mockClass = $this->getMockClass(
+                'Xi\Filelib\Command\Command',
+                array(),
+                array(),
+                'ManateeTussi'
+            );
+        }
+
+
+        $executable = $this->commandFactory->createCommand(
+            'tussi'
+        );
+        $this->assertInstanceOf('Xi\Filelib\Command\Executable', $executable);
+
+        $this->assertAttributeInstanceOf(
+            'Xi\Filelib\Command\AsynchronousExecutionStrategy',
+            'strategy',
+            $executable
         );
 
-        $this->assertInstanceOf($mockClass, $command);
+        $executable = $this->commandFactory->createCommand(
+            'lussi'
+        );
+        $this->assertInstanceOf('Xi\Filelib\Command\Executable', $executable);
+
+        $this->assertAttributeInstanceOf(
+            'Xi\Filelib\Command\SynchronousExecutionStrategy',
+            'strategy',
+            $executable
+        );
+
     }
 }

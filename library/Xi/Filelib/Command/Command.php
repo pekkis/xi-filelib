@@ -9,7 +9,10 @@
 
 namespace Xi\Filelib\Command;
 
-interface Command
+use Xi\Filelib\Queue\Enqueueable;
+use Serializable;
+
+interface Command extends Enqueueable, Serializable
 {
     public function execute();
 }
