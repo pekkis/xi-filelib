@@ -181,12 +181,12 @@ class CommandFactoryTest extends \Xi\Filelib\Tests\TestCase
         $self = $this;
 
         $callbacks = array(
-            EnqueueableCommand::STRATEGY_ASYNCHRONOUS => function(Commander $co, $ret) use ($self) {
+            EnqueueableCommand::STRATEGY_ASYNCHRONOUS => function (Commander $co, $ret) use ($self) {
                 $this->assertEquals('queuedValue', $ret);
                 $this->assertSame($self->commander, $co);
                 return 'asynchronous';
             },
-            EnqueueableCommand::STRATEGY_SYNCHRONOUS => function(Commander $co, $ret) use ($self) {
+            EnqueueableCommand::STRATEGY_SYNCHRONOUS => function (Commander $co, $ret) use ($self) {
                 $this->assertEquals('originalValue', $ret);
                 $this->assertSame($self->commander, $co);
                 return 'synchronous';
