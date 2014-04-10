@@ -11,6 +11,7 @@ namespace Xi\Filelib\Plugin\Image;
 
 use Xi\Filelib\File\File;
 use Xi\Filelib\File\FileRepository;
+use Xi\Filelib\Plugin\Image\Adapter\ImageProcessorAdapter;
 use Xi\Filelib\Plugin\VersionProvider\AbstractVersionProvider;
 use Xi\Filelib\FileLibrary;
 
@@ -19,7 +20,10 @@ use Xi\Filelib\FileLibrary;
  */
 class VersionPlugin extends AbstractVersionProvider
 {
-    protected $imageMagickHelper;
+    /**
+     * @var CommandHelper
+     */
+    protected $commandHelper;
 
     /**
      * @var File extension for the version
@@ -34,7 +38,8 @@ class VersionPlugin extends AbstractVersionProvider
     public function __construct(
         $identifier,
         $commandDefinitions = array(),
-        $extension = null
+        $extension = null,
+        ImageProcessorAdapter $adapter = null
     ) {
         parent::__construct(
             $identifier,
@@ -45,7 +50,10 @@ class VersionPlugin extends AbstractVersionProvider
         );
         $this->extension = $extension;
 
-        $this->imageMagickHelper = new ImageMagickHelper($commandDefinitions);
+        $this->commandHelper = new CommandHelper(
+            $commandDefinitions,
+            $adapter
+        );
     }
 
     public function attachTo(FileLibrary $filelib)
@@ -57,11 +65,11 @@ class VersionPlugin extends AbstractVersionProvider
     /**
      * Returns ImageMagick helper
      *
-     * @return ImageMagickHelper
+     * @return CommandHelper
      */
-    public function getImageMagickHelper()
+    public function getCommandHelper()
     {
-        return $this->imageMagickHelper;
+        return $this->commandHelper;
     }
 
     /**
@@ -74,14 +82,15 @@ class VersionPlugin extends AbstractVersionProvider
     {
         // Todo: optimize
         $retrieved = $this->storage->retrieve($file->getResource());
-        $img = $this->getImageMagickHelper()->createImagick($retrieved);
 
-        $this->getImageMagickHelper()->execute($img);
+        // $img = $this->getImageMagickHelper()->createImagick($retrieved);
 
         $tmp = $this->tempDir . '/' . uniqid('', true);
-        $img->writeImage($tmp);
 
-        return array($this->getIdentifier() => $tmp);
+        $this->getCommandHelper()->execute($retrieved, $tmp);
+        return array(
+            $this->getIdentifier() => $tmp
+        );
     }
 
     public function getVersions()

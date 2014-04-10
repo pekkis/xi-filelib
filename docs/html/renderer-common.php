@@ -8,6 +8,10 @@ use Xi\Filelib\Plugin\VersionProvider\OriginalVersionPlugin;
 use Xi\Filelib\Plugin\Image\VersionPlugin;
 use Xi\Filelib\Authorization\Adapter\SimpleAuthorizationAdapter;
 use Xi\Filelib\Authorization\AuthorizationPlugin;
+use Xi\Filelib\Plugin\Image\Adapter\ImagineImageProcessorAdapter;
+use Imagine\Imagick\Imagine;
+use Imagine\Image\Box;
+use Imagine\Image\ImageInterface;
 
 $AuthorizationAdapter = new SimpleAuthorizationAdapter();
 $AuthorizationPlugin = new AuthorizationPlugin($AuthorizationAdapter);
@@ -32,12 +36,10 @@ $filelib->addPlugin($originalPlugin);
 $versionPlugin = new VersionPlugin(
     'cinemascope',
     array(
-        array('setImageCompression',Imagick::COMPRESSION_JPEG),
-        array('setImageFormat', 'jpg'),
-        array('setImageCompressionQuality', 50),
-        array('cropThumbnailImage', array(800, 200)),
-        array('sepiaToneImage', 90),
-        'Xi\Filelib\Plugin\Image\Command\WatermarkCommand' => array(__DIR__ . '/watermark.png', 'se', 10),
-    )
+        array('thumbnail', array(new Box(800, 200), ImageInterface::THUMBNAIL_OUTBOUND)),
+        // 'Xi\Filelib\Plugin\Image\Command\WatermarkCommand' => array(__DIR__ . '/watermark.png', 'se', 10),
+    ),
+    'jpg',
+    new ImagineImageProcessorAdapter(new Imagine())
 );
 $filelib->addPlugin($versionPlugin);

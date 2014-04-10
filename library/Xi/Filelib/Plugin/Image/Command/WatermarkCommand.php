@@ -11,6 +11,7 @@ namespace Xi\Filelib\Plugin\Image\Command;
 
 use Imagick;
 use Xi\Filelib\InvalidArgumentException;
+use Xi\Filelib\RuntimeException;
 
 /**
  * Watermarks an image version
@@ -102,8 +103,12 @@ class WatermarkCommand extends AbstractCommand
         return $this->padding;
     }
 
-    public function execute(Imagick $imagick)
+    public function execute($imagick)
     {
+        if (!$imagick instanceof Imagick) {
+            throw new RuntimeException('Watermark command needs imagick');
+        }
+
         $coordinates = $this->calculateCoordinates($imagick);
 
         $imagick->compositeImage(

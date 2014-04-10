@@ -10,6 +10,7 @@
 namespace Xi\Filelib\Plugin\Image\Command;
 
 use Imagick;
+use Xi\Filelib\Plugin\Image\Adapter\ImageProcessorAdapter;
 
 /**
  * Interface for ImageMagick version plugin commands
@@ -21,16 +22,7 @@ interface Command
     /**
      * Executes command
      *
-     * @param Imagick $imagick
+     * @param mixed $obj
      */
-    public function execute(Imagick $imagick);
-
-    /**
-     * Creates a new Imagick resource
-     *
-     * @param  string  $path Image path
-     * @return Imagick
-     * @todo This is not necessary
-     */
-    public function createImagick($path);
+    public function execute($obj);
 }

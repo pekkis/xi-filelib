@@ -44,7 +44,8 @@
         "videlalvaro/php-amqplib": "2.2.*",
         "zencoder/zencoder-php": "2.1.x",
         "knplabs/gaufrette": "0.1.*",
-        "aws/aws-sdk-php": "2.5.*"
+        "aws/aws-sdk-php": "2.5.*",
+        "imagine/imagine": "v0.5.0"
     },
 
     "suggest": {

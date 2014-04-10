@@ -9,7 +9,6 @@
 
 namespace Xi\Filelib\Plugin\Image\Command;
 
-use Imagick;
 use BadMethodCallException;
 
 class ExecuteMethodCommand extends AbstractCommand
@@ -39,9 +38,9 @@ class ExecuteMethodCommand extends AbstractCommand
         return $this->parameters;
     }
 
-    public function execute(Imagick $imagick)
+    public function execute($obj)
     {
-        $callable = array($imagick, $this->getMethod());
+        $callable = array($obj, $this->getMethod());
 
         if (!is_callable($callable)) {
             throw new BadMethodCallException(
@@ -52,7 +51,7 @@ class ExecuteMethodCommand extends AbstractCommand
             );
         }
 
-        call_user_func_array($callable, $this->getParameters());
+        return call_user_func_array($callable, $this->getParameters());
     }
 
 

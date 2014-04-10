@@ -9,9 +9,8 @@
 
 namespace Xi\Filelib\Plugin\Image;
 
-use Imagick;
-use ImagickException;
-use Xi\Filelib\InvalidArgumentException;
+use Xi\Filelib\Plugin\Image\Adapter\ImageProcessorAdapter;
+use Xi\Filelib\Plugin\Image\Adapter\ImagickImageProcessorAdapter;
 use Xi\Filelib\Plugin\Image\Command\Command;
 
 /**
@@ -19,15 +18,28 @@ use Xi\Filelib\Plugin\Image\Command\Command;
  *
  * @author pekkis
  */
-class ImageMagickHelper
+class CommandHelper
 {
     protected $commands = array();
 
-    public function __construct($commandDefinitions = array())
-    {
+    /**
+     * @var ImageProcessorAdapter
+     */
+    protected $adapter;
+
+    public function __construct(
+        $commandDefinitions = array(),
+        ImageProcessorAdapter $adapter = null
+    ) {
         foreach ($commandDefinitions as $key => $definition) {
             $this->addCommand($this->createCommandFromDefinition($key, $definition));
         }
+
+        if (!$adapter) {
+            $adapter = new ImagickImageProcessorAdapter();
+        }
+
+        $this->adapter = $adapter;
     }
 
     /**
@@ -60,32 +72,9 @@ class ImageMagickHelper
         $this->commands[$key] = $command;
     }
 
-
-    public function execute($img)
+    public function execute($source, $target)
     {
-        foreach ($this->getCommands() as $command) {
-            $command->execute($img);
-        }
-    }
-
-    /**
-     * Creates a new imagick resource from path
-     *
-     * @param  string                   $path Image path
-     * @return Imagick
-     * @throws InvalidArgumentException
-     */
-    public function createImagick($path)
-    {
-        try {
-            return new Imagick($path);
-        } catch (ImagickException $e) {
-            throw new InvalidArgumentException(
-                sprintf("ImageMagick could not be created from path '%s'", $path),
-                500,
-                $e
-            );
-        }
+        $this->adapter->execute($source, $target, $this);
     }
 
     /**
