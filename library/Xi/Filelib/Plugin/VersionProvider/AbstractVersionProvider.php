@@ -37,11 +37,6 @@ abstract class AbstractVersionProvider extends AbstractPlugin implements Version
     );
 
     /**
-     * @var string Version identifier
-     */
-    protected $identifier;
-
-    /**
      * @var array Array of file types for which the plugin provides a version
      */
     protected $providesFor;
@@ -62,12 +57,10 @@ abstract class AbstractVersionProvider extends AbstractPlugin implements Version
     protected $extensionReplacements = array('jpeg' => 'jpg');
 
     /**
-     * @param string $identifier
      * @param callable $providesFor
      */
-    public function __construct($identifier, $providesFor)
+    public function __construct($providesFor)
     {
-        $this->identifier = $identifier;
         $this->providesFor = $providesFor;
     }
 
@@ -100,16 +93,6 @@ abstract class AbstractVersionProvider extends AbstractPlugin implements Version
     }
 
     abstract public function createTemporaryVersions(File $file);
-
-    /**
-     * Returns identifier
-     *
-     * @return string
-     */
-    public function getIdentifier()
-    {
-        return $this->identifier;
-    }
 
     /**
      * Returns whether the plugin provides a version for a file.

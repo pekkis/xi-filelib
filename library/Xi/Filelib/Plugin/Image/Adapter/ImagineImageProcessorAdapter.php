@@ -28,7 +28,14 @@ class ImagineImageProcessorAdapter implements ImageProcessorAdapter
             $image = $command->execute($image);
         }
 
-        $image->save($target);
+        $executeOptions = $commandHelper->getExecuteOptions();
+        if (isset($executeOptions['save'])) {
+            $saveOptions = $executeOptions['save'];
+        } else {
+            $saveOptions = array();
+        }
+
+        $image->save($target, $saveOptions);
     }
 
     /**

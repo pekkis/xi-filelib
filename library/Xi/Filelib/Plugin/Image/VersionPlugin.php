@@ -35,24 +35,31 @@ class VersionPlugin extends AbstractVersionProvider
      */
     protected $tempDir;
 
+    /**
+     * @var string
+     */
+    protected $identifier;
+
     public function __construct(
         $identifier,
         $commandDefinitions = array(),
         $extension = null,
-        ImageProcessorAdapter $adapter = null
+        ImageProcessorAdapter $adapter = null,
+        $executeOptions = array()
     ) {
         parent::__construct(
-            $identifier,
             function (File $file) {
                 // @todo: maybe some more complex mime type based checking
                 return (bool) preg_match("/^image/", $file->getMimetype());
             }
         );
+        $this->identifier = $identifier;
         $this->extension = $extension;
 
         $this->commandHelper = new CommandHelper(
             $commandDefinitions,
-            $adapter
+            $adapter,
+            $executeOptions
         );
     }
 
@@ -82,14 +89,10 @@ class VersionPlugin extends AbstractVersionProvider
     {
         // Todo: optimize
         $retrieved = $this->storage->retrieve($file->getResource());
-
-        // $img = $this->getImageMagickHelper()->createImagick($retrieved);
-
         $tmp = $this->tempDir . '/' . uniqid('', true);
-
         $this->getCommandHelper()->execute($retrieved, $tmp);
         return array(
-            $this->getIdentifier() => $tmp
+            $this->identifier => $tmp
         );
     }
 

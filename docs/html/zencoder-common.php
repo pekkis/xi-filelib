@@ -8,7 +8,6 @@ use Xi\Filelib\Authorization\AutomaticPublisherPlugin;
 use Xi\Filelib\Authorization\Adapter\SimpleAuthorizationAdapter;
 
 $zencoderPlugin = new ZencoderPlugin(
-    'zencoder',
     ZENCODER_KEY,
     S3_KEY,
     S3_SECRETKEY,

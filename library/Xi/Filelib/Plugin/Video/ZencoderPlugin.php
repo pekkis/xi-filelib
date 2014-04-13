@@ -69,7 +69,6 @@ class ZencoderPlugin extends AbstractVersionProvider implements VersionProvider
     private $sleepyTime = 5;
 
     public function __construct(
-        $identifier,
         $apiKey,
         $awsKey,
         $awsSecretKey,
@@ -77,7 +76,6 @@ class ZencoderPlugin extends AbstractVersionProvider implements VersionProvider
         $outputs = array()
     ) {
         parent::__construct(
-            $identifier,
             function (File $file) {
                 // @todo: maybe some more complex mime type based checking
                 return (bool) preg_match("/^video/", $file->getMimetype());

@@ -39,7 +39,12 @@ $versionPlugin = new VersionPlugin(
         array('thumbnail', array(new Box(800, 200), ImageInterface::THUMBNAIL_OUTBOUND)),
         // 'Xi\Filelib\Plugin\Image\Command\WatermarkCommand' => array(__DIR__ . '/watermark.png', 'se', 10),
     ),
-    'jpg',
-    new ImagineImageProcessorAdapter(new Imagine())
+    'jpeg',
+    new ImagineImageProcessorAdapter(new Imagine()),
+    array(
+        'save' => array(
+            'quality' => 30,
+        )
+    )
 );
 $filelib->addPlugin($versionPlugin);

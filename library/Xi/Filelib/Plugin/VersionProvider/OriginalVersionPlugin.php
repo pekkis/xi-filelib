@@ -22,11 +22,16 @@ class OriginalVersionPlugin extends AbstractVersionProvider
      */
     private $tempDir;
 
+    /**
+     * @var string
+     */
+    private $identifier;
+
     public function __construct(
-        $identifier
+        $identifier = 'original'
     ) {
+        $this->identifier = $identifier;
         parent::__construct(
-            $identifier = 'original',
             function (File $file) {
                 return true;
             }
@@ -53,7 +58,7 @@ class OriginalVersionPlugin extends AbstractVersionProvider
         copy($retrieved, $tmp);
 
         return array(
-            $this->getIdentifier() => $tmp,
+            $this->identifier => $tmp,
         );
     }
 

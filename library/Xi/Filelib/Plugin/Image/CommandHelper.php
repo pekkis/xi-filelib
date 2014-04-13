@@ -27,9 +27,15 @@ class CommandHelper
      */
     protected $adapter;
 
+    /**
+     * @var array
+     */
+    protected $executeOptions = array();
+
     public function __construct(
         $commandDefinitions = array(),
-        ImageProcessorAdapter $adapter = null
+        ImageProcessorAdapter $adapter = null,
+        $executeOptions = array()
     ) {
         foreach ($commandDefinitions as $key => $definition) {
             $this->addCommand($this->createCommandFromDefinition($key, $definition));
@@ -40,6 +46,7 @@ class CommandHelper
         }
 
         $this->adapter = $adapter;
+        $this->executeOptions = $executeOptions;
     }
 
     /**
@@ -70,6 +77,11 @@ class CommandHelper
     public function setCommand($key, $command)
     {
         $this->commands[$key] = $command;
+    }
+
+    public function getExecuteOptions()
+    {
+        return $this->executeOptions;
     }
 
     public function execute($source, $target)
